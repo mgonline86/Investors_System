@@ -40,4 +40,4 @@ class ConfigClass(object):
     USER_ENABLE_INVITE_USER = True
     USER_CORPORATION_NAME = "VINCITORI"
     USER_COPYRIGHT_YEAR = 2022
-    # USER_REQUIRE_INVITATION  = True # Only invited users may register.
+    USER_REQUIRE_INVITATION  = True # Only invited users may register.
