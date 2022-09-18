@@ -1,0 +1,25 @@
+{% extends '/flask_user_layout.html' %}
+{% block title %}INVESTORS SYSTEM{% endblock %}
+{% block style %}{% endblock %}
+{% block home_active %}active{% endblock %}
+{% block content %}
+  <div class="row">
+    <div class="col mx-auto text-center">
+      <h1 class="display-4">INVESTORS SYSTEM</h1>
+      <div class="card-deck d-flex align-content-start flex-wrap">
+        <div class="card m-2" style="width: 12rem;">
+          <a href="/signal_investors" class="nostyle">
+            <img class="signal_svg" src="/static/img/logo-signal.svg" alt="logo-signal"/>
+            <div class="card-footer">
+              <span class="h4">
+              Signal NFX
+              </span>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block js %}{% endblock %}

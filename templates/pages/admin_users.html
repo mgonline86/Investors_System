@@ -1,0 +1,25 @@
+{% extends 'flask_user_layout.html' %}
+{% block title %}Users Management{% endblock %}
+{% block style %}<link rel="stylesheet" href="/static/css/admin_users.css">{% endblock %}
+{% block users_page_active %}active{% endblock %}
+{% block content %}
+    <div>
+        <button type="button" class="btn btn-link">
+            <a href="/user/invite">+ Invite User</a>
+        </button>
+    </div>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Email</th>
+                <th scope="col">Admin</th>
+                <th scope="col">Remove</th>
+            </tr>
+        </thead>
+        <tbody id ="users_rows_container">
+        
+        </tbody>
+    </table>
+{% endblock %}
+{% block js %}<script src="/static/js/admin_users.js"></script>{% endblock %}

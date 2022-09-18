@@ -1,0 +1,49 @@
+body{
+    min-height: 100vh;
+}
+
+.hidden{
+    visibility : hidden;
+    display: none;
+}
+
+a.nostyle:link {
+    text-decoration: inherit;
+    color: inherit;
+}
+
+a.nostyle:visited {
+    text-decoration: inherit;
+    color: inherit;
+}
+
+
+/* RENDERJSON */
+.renderjson a              { text-decoration: none; }
+.renderjson .disclosure    { color: crimson;
+                             font-size: 150%; }
+.renderjson .syntax        { color: grey; }
+.renderjson .string        { color: tomato; }
+.renderjson .number        { color: rgb(32, 172, 4); }
+.renderjson .boolean       { color: plum; }
+.renderjson .key           { color: rgb(24, 72, 88); }
+.renderjson .keyword       { color: rgb(226, 157, 28); }
+.renderjson .object.syntax { color: lightseagreen; }
+.renderjson .array.syntax  { color: lightsalmon; }
+
+
+
+/* Signal SVG */
+.signal_svg {
+    height: 3rem;
+    margin: 50px 10px;
+    -webkit-filter: invert(100%); /* safari 6.0 - 9.0 */
+    filter: invert(100%);
+}
+
+/** Investors List **/
+/* Image */
+#signal_inv li img{
+    max-width: 100px !important;
+    border-radius: 10px;
+}

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% if call_or_get(current_user.is_authenticated) %}
+    <title>{% block title %}{% endblock %}</title>
+    {% else %}
+    <title>{{ user_manager.USER_APP_NAME }}</title>
+    {% endif %}
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/datatables.min.css"/>
+    <link rel="stylesheet" href="/static/css/fontawesome-free-5.15.4-web/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/bootstrap-icons-1.8.1/bootstrap-icons.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css"/>
+    {% block style %}{% endblock %}
+    
+    <!-- In-lining styles to avoid needing a separate .css file -->
+    <style>
+      hr { border-color: #cccccc; margin: 0; }
+      .no-margins { margin: 0px; }
+      .with-margins { margin: 10px; }
+      .col-centered { float: none; margin: 0 auto; }
+  </style>
+
+</head>
+<body>
+  <nav id="navbar_top" class="navbar navbar-expand-lg navbar-light px-4">
+    <a class="navbar-brand" href="/">
+        <img src="/static/img/logo.jpg" width="30" height="30" class="d-inline-block align-top" alt="Logo">
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link  {% block home_active %}{% endblock %}" aria-current="page" href="/">Home</span></a>
+        </li>
+        {% if call_or_get(current_user.is_authenticated) %}
+        <li class="nav-item">
+          <a class="nav-link {% block signal_inv_active %}{% endblock %}" href="/signal_investors">Signal Investors</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% block users_page_active %}{% endblock %}" href="/admin/users_page">Users</a>
+        </li>
+        {% endif %}
+      </ul>
+      <ul class="navbar-nav navbar-right">
+        {% if call_or_get(current_user.is_authenticated) %}
+        <li>
+          <a class="nav-link text-info" href="{{ url_for('user.edit_user_profile') }}">{{ current_user.first_name }}</a>
+        </li>
+        <li>
+            <a class="nav-link text-danger" href="{{ url_for('user.logout') }}">{%trans%}Sign out{%endtrans%}</a>
+        </li>
+        {% else %}
+        <li>
+            <a class="nav-link text-primary" href="{{ url_for('user.login') }}">{%trans%}Sign in{%endtrans%}</a>
+        </li>
+        {% endif %}
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container">
+    
+      <div id="loading_overlay" class="invisible container d-flex justify-content-center" style="
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      z-index: 5;
+    ">
+      <div class="spinner-border" role="status"style="
+        position: fixed;
+        top: 45vh;
+        width: 7rem;
+        height: 7rem;
+      "></div>
+    </div>
+    {# One-time system messages called Flash messages #}
+    {% block flash_messages %}
+        {%- with messages = get_flashed_messages(with_categories=true) -%}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {% if category=='error' %}
+                        {% set category='danger' %}
+                    {% endif %}
+                    <div class="alert alert-{{category}}">{{ message|safe }}</div>
+                {% endfor %}
+            {% endif %}
+        {%- endwith %}
+    {% endblock %}
+
+      <h1 class="text-center">{% block page_title %}{% endblock %}</h1>
+      <div id="main_content">{% block content %}{% endblock %}</div>
+  </div>
+  <script src="/static/js/main.js"></script>
+  <script src="/static/js/jquery-3.3.1.min.js"></script>
+  <script type="text/javascript" src="/static/js/datatables.min.js"></script>
+  <script src="/static/js/bootstrap.bundle.min.js"></script>
+  <script type="text/javascript" src="/static/js/renderjson.js"></script>
+  {% block js %}{% endblock %}
+</body>
+</html>
