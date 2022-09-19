@@ -104,6 +104,7 @@ def handle_signal_investors():
         query = {}
         body = request.get_json()
         stage = body.get("stage")
+        stage_match_all = body.get("stage_match_all")
         min_invs_connect = body.get("min_invs_connect")
         max_invs_connect = body.get("max_invs_connect")
 
@@ -113,13 +114,20 @@ def handle_signal_investors():
         # max_investment = body.get("max_investment")
 
         if stage and len(stage) > 0:
-            query["stage"] = { "$all": stage }
+            query["stage"] = { "$in": stage }
+            if stage_match_all:
+              query["stage"] = { "$all": stage }
         
+
+        if (min_invs_connect and min_invs_connect != "") or (max_invs_connect and max_invs_connect != ""):
+            query["Investing Connections"] = {}
+            query["Investing Connections"]["$exists"] = True
+
         if min_invs_connect and min_invs_connect != "":
-            query["Investing Connections"] = {"$exists": True, '$gte': int(min_invs_connect)}
+            query["Investing Connections"]['$gte'] = int(min_invs_connect)
         
         if max_invs_connect and max_invs_connect != "":
-            query["Investing Connections"] = {"$exists": True, '$lte': int(max_invs_connect)}
+            query["Investing Connections"]['$lte'] = int(max_invs_connect)
         
         # if min_investment and min_investment != "":
         #     query["min_investment"] = {"$exists": True, '$gte': int(min_investment)}
@@ -127,6 +135,7 @@ def handle_signal_investors():
         # if max_investment and max_investment != "":
         #     query["max_investment"] = {"$exists": True, '$lte': int(max_investment)}
         
+        print(query)
 
         signal_invest_data = db.signalNFXInvestors
         

@@ -1,6 +1,7 @@
 // Get signal_inv data function
 var query = {
     stage: [],
+    stage_match_all: false,
     min_invs_connect: "",
     max_invs_connect: "",
     min_investment: "",
@@ -501,9 +502,16 @@ VirtualSelect.init({
 //     noSearchResultsTex: 'No results found',
 // });
 
+
+// Handle Investor connections amount
 document.querySelector('#stage-select').addEventListener('change', function() {
     query.stage = this.value;
 });
+const handleStageMatchAll = () => {
+    var stageMatchAll = document.getElementById("stage-all-check").checked;
+    console.log(stageMatchAll)
+    query.stage_match_all = stageMatchAll;
+}
 
 // Handle Investor connections amount
 const handleMinInvCon = () => {

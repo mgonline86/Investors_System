@@ -15,15 +15,20 @@
 
 <div class="offcanvas offcanvas-start" data-bs-scroll="true" tabindex="-1" id="offcanvasWithBothOptions" aria-labelledby="offcanvasWithBothOptionsLabel">
     <div class="offcanvas-header">
-      <h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel">Backdrop with scrolling</h5>
+      <h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel">Filters</h5>
       <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body">
         <form class="row gy-2 gx-3 align-items-center">
             <div class="col-12">
-                <label for="stage-select" class="col-12 form-label">Stage</label>
+                <label for="stage-select" class="col-12 form-label h6">Stage</label>
                 <div id="stage-select"></div>
             </div>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" role="switch" id="stage-all-check" onchange="handleStageMatchAll()">
+                <label class="form-check-label" for="stage-all-check">Match All</label>
+            </div>
+            <hr>
             {#<div class="col-auto">
                 <label for="example-select-2" class="form-label">Another label</label>
                 <div id="example-select-2"></div>
