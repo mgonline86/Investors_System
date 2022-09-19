@@ -103,7 +103,6 @@ def handle_signal_investors():
     try:
         query = {}
         body = request.get_json()
-        print(body)
         stage = body.get("stage")
         min_invs_connect = body.get("min_invs_connect")
         max_invs_connect = body.get("max_invs_connect")
@@ -133,20 +132,28 @@ def handle_signal_investors():
         
         #Logic for pagination
         offset = int(request.args.get('offset',0))
-        print(offset)
         limit = 10
         
         starting_id = signal_invest_data.find(query).sort('_id', pymongo.ASCENDING)
-        last_id = starting_id[offset]['_id']
+        try:
+          last_id = starting_id[offset]['_id']
+        except:
+          last_id = None
 
         next_chunk = offset + limit
         prev_chunk = 0
         if offset - limit > 0:
             prev_chunk = offset - limit
 
-        json_data = signal_invest_data.find({'_id' : {'$gte': last_id} }, limit=limit)
+        # Counting Query Documents Vs. Total Documents
         query_count = signal_invest_data.count_documents(query)
         total_count = signal_invest_data.count_documents({})
+        
+        if last_id:
+          json_data = signal_invest_data.find({**query, **{"_id": {'$gte': last_id}}}, limit=limit)
+        else:
+          json_data = []
+
         return jsonify({
             "investors": loads(dumps(json_data)),
             "total_count": total_count,

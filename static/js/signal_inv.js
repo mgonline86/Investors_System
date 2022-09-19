@@ -40,41 +40,51 @@ async function get_signal_inv(page_chunk = null) {
         try {
             var {investors, total_count, query_count, next_chunk, prev_chunk, limit} = data
             
-            for (let i = 0; i < investors.length; i++) {
-                let current_investor = investors[i]
-
-                // Creating a List Item
-                let li = document.createElement('li');
-                li.classList.add("list-group-item");
-
-                // Appending main image to the list element
-                if (current_investor["images"].length !== 0) {
-                    let img = document.createElement('img');
-                    img.src = current_investor["images"][0];
-                    img.classList.add("img-fluid")
-                    li.appendChild(img)
-                }
-                
-                // Appending Full name to the list element
-                if (current_investor["Full name"]) {
-                    let h3 = document.createElement('h3');
-                    h3.textContent = current_investor["Full name"];
-                    li.appendChild(h3)
+            if (investors.length > 0) {
+                for (let i = 0; i < investors.length; i++) {
+                    let current_investor = investors[i]
+    
+                    // Creating a List Item
+                    let li = document.createElement('li');
+                    li.classList.add("list-group-item");
+    
+                    // Appending main image to the list element
+                    if (current_investor["images"].length !== 0) {
+                        let img = document.createElement('img');
+                        img.src = current_investor["images"][0];
+                        img.classList.add("img-fluid")
+                        li.appendChild(img)
+                    }
                     
-                }
-                // Appending Position to the list element
-                if (current_investor["Position"]) {
-                    let p = document.createElement('p');
-                    p.classList.add("text-muted")
-                    p.textContent = current_investor["Position"];
-                    li.appendChild(p)
-                }
-
-                // Appending RenderJson to the list element
-                li.appendChild(
-                    renderjson(current_investor)
-                );
-                signal_inv_element.appendChild(li);
+                    // Appending Full name to the list element
+                    if (current_investor["Full name"]) {
+                        let h3 = document.createElement('h3');
+                        h3.textContent = current_investor["Full name"];
+                        li.appendChild(h3)
+                        
+                    }
+                    // Appending Position to the list element
+                    if (current_investor["Position"]) {
+                        let p = document.createElement('p');
+                        p.classList.add("text-muted")
+                        p.textContent = current_investor["Position"];
+                        li.appendChild(p)
+                    }
+    
+                    // Appending RenderJson to the list element
+                    li.appendChild(
+                        renderjson(current_investor)
+                    );
+                    signal_inv_element.appendChild(li);
+                }                    
+            }
+            else{
+                // if no investors found for the current query
+                let p = document.createElement('p');
+                    p.classList.add("h3")
+                    p.classList.add("text-info")
+                    p.textContent = "NO RESULT FOUND!";
+                    signal_inv_element.appendChild(p)
             }
             
             prev_btn.onclick = function() { get_signal_inv(prev_chunk) }
@@ -98,7 +108,7 @@ async function get_signal_inv(page_chunk = null) {
             
             query_count_ele.textContent = query_count
             total_count_ele.textContent = total_count
-            count_percent_ele.textContent = ((query_count/total_count)*100).toFixed(1)
+            count_percent_ele.textContent = ((query_count/total_count)*100).toFixed(3)
 
             hide_load_layout();
         } catch (err) {
