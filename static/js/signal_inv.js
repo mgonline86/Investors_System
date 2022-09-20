@@ -1,11 +1,15 @@
 // Get signal_inv data function
 var query = {
+    min_sweet_spot: "",
+    max_sweet_spot: "",
+    newstage: [],
     stage: [],
     stage_match_all: false,
     min_invs_connect: "",
     max_invs_connect: "",
     min_investment: "",
     max_investment: "",
+    position:[],
 }
 var prev_chunk = 0
 var next_chunk = 0
@@ -40,44 +44,43 @@ async function get_signal_inv(page_chunk = null) {
     .then(data => {
         try {
             var {investors, total_count, query_count, next_chunk, prev_chunk, limit} = data
-            
             if (investors.length > 0) {
-                for (let i = 0; i < investors.length; i++) {
-                    let current_investor = investors[i]
-    
-                    // Creating a List Item
-                    let li = document.createElement('li');
-                    li.classList.add("list-group-item");
-    
-                    // Appending main image to the list element
-                    if (current_investor["images"].length !== 0) {
-                        let img = document.createElement('img');
-                        img.src = current_investor["images"][0];
-                        img.classList.add("img-fluid")
-                        li.appendChild(img)
-                    }
+              for (let i = 0; i < investors.length; i++) {
+                let current_investor = investors[i]
+
+                // Creating a List Item
+                let li = document.createElement('li');
+                li.classList.add("list-group-item");
+
+                // Appending main image to the list element
+                if (current_investor["images"].length !== 0) {
+                    let img = document.createElement('img');
+                    img.src = current_investor["images"][0];
+                    img.classList.add("img-fluid")
+                    li.appendChild(img)
+                }
+                
+                // Appending Full name ( Profile Name ) to the list element
+                if (current_investor["Profile Name"]) {
+                    let h3 = document.createElement('h3');
+                    h3.textContent = current_investor["Profile Name"];
+                    li.appendChild(h3)
                     
-                    // Appending Full name to the list element
-                    if (current_investor["Full name"]) {
-                        let h3 = document.createElement('h3');
-                        h3.textContent = current_investor["Full name"];
-                        li.appendChild(h3)
-                        
-                    }
-                    // Appending Position to the list element
-                    if (current_investor["Position"]) {
-                        let p = document.createElement('p');
-                        p.classList.add("text-muted")
-                        p.textContent = current_investor["Position"];
-                        li.appendChild(p)
-                    }
-    
-                    // Appending RenderJson to the list element
-                    li.appendChild(
-                        renderjson(current_investor)
-                    );
-                    signal_inv_element.appendChild(li);
-                }                    
+                }
+                // Appending Position to the list element
+                if (current_investor["Position"]) {
+                    let p = document.createElement('p');
+                    p.classList.add("text-muted")
+                    p.textContent = current_investor["Position"];
+                    li.appendChild(p)
+                }
+
+                // Appending RenderJson to the list element
+                li.appendChild(
+                    renderjson(current_investor)
+                );
+                signal_inv_element.appendChild(li);
+            }
             }
             else{
                 // if no investors found for the current query
@@ -122,8 +125,65 @@ async function get_signal_inv(page_chunk = null) {
 // Call Get signal_inv data function
 get_signal_inv();
 
-
 /** HANDLING FILTERS */
+//added by hesham
+//position filter
+var positionOptions = [  
+    {label: 'angel', value: 'angel',},
+    {label: 'partner', value: 'partner',},
+    {label: 'general_partner', value: 'general_partner',},
+
+];
+
+VirtualSelect.init({
+    ele: '#position-select',
+    options: positionOptions,
+    search: true,
+    // Enable the multi select support
+    multiple: false,
+    // Customize the placeholder text
+    placeholder: 'Search',
+    // Text to show when no options to show
+    noOptionsText: 'No results found',
+    // Text to show when no results on search
+    noSearchResultsTex: 'No results found',
+});
+
+document.querySelector('#position-select').addEventListener('change', function() {
+    query.position = this.value;
+});
+
+
+
+//newstage filter
+var newStageOptions = [
+    {label: 'pre-seed', value: 'pre-seed',},
+    {label: 'seed', value: 'seed',},
+    {label: 'post-seed', value: 'post-seed',},
+    {label: 'series-a', value: 'series-a',},
+    {label: 'series-b', value: 'series-b',},
+    {label: 'series-c', value: 'series-c',},
+    {label: 'series-d', value: 'series-d',},
+    ]
+
+VirtualSelect.init({
+    ele: '#new-stage-select',
+    options: newStageOptions,
+    search: true,
+    // Enable the multi select support
+    multiple: true,
+    // Customize the placeholder text
+    placeholder: 'Select first',
+    // Text to show when no options to show
+    noOptionsText: 'No results found',
+    // Text to show when no results on search
+    noSearchResultsTex: 'No results found',
+});
+
+document.querySelector('#new-stage-select').addEventListener('change', function() {
+    query.newstage = this.value;
+});
+///// added by hesham
 var stageOptions = [
     {label: 'drug-delivery-pre-seed', value: 'drug-delivery-pre-seed',},
     {label: 'social-commerce-series-b', value: 'social-commerce-series-b',},
@@ -502,16 +562,28 @@ VirtualSelect.init({
 //     noSearchResultsTex: 'No results found',
 // });
 
-
-// Handle Investor connections amount
+// Handle old stage filter
 document.querySelector('#stage-select').addEventListener('change', function() {
     query.stage = this.value;
 });
+
 const handleStageMatchAll = () => {
     var stageMatchAll = document.getElementById("stage-all-check").checked;
     console.log(stageMatchAll)
     query.stage_match_all = stageMatchAll;
 }
+
+//Handle sweet_spot filter
+const handleMinSweet = () => {
+    var minSweetValue = document.getElementById("min-sweet-spot").value;
+    query.min_sweet_spot = minSweetValue;
+}
+const handleMaxSweet = () => {
+    var maxSweetValue = document.getElementById("max-sweet-spot").value;
+    query.max_sweet_spot = maxSweetValue;
+}
+
+
 
 // Handle Investor connections amount
 const handleMinInvCon = () => {

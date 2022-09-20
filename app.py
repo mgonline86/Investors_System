@@ -16,12 +16,13 @@ from bson.json_util import dumps
 from json import loads
 import pymongo
 
+'''
 API_KEY = os.getenv('API_KEY')
 API_PASS = os.getenv('API_PASS')
 API_TOKEN = os.getenv('API_TOKEN')
 API_HOST = os.getenv('API_HOST')
 # SECRET_KEY = os.getenv('SECRET_KEY')
-
+'''
 app = Flask(__name__)
 # app.secret_key = SECRET_KEY
 
@@ -103,8 +104,21 @@ def handle_signal_investors():
     try:
         query = {}
         body = request.get_json()
+        print(body)
+
+        min_sweet_spot = body.get("min_sweet_spot")
+        max_sweet_spot = body.get("max_sweet_spot")
+        
+        newstage = body.get("newstage")
+        
+        position = body.get("position")
+        
         stage = body.get("stage")
-        stage_match_all = body.get("stage_match_all")
+        try:
+            stage_match_all = body.get("stage_match_all")
+        except:
+            pass
+        
         min_invs_connect = body.get("min_invs_connect")
         max_invs_connect = body.get("max_invs_connect")
 
@@ -112,57 +126,128 @@ def handle_signal_investors():
 
         # min_investment = body.get("min_investment")
         # max_investment = body.get("max_investment")
+        
+        #sweet spot filter
+        if (min_sweet_spot and min_sweet_spot != "") or (max_sweet_spot and max_sweet_spot != ""):
+            query["Sweet Spot"] = {}
+            query["Sweet Spot"]["$exists"] = True
+
+        if min_sweet_spot and min_sweet_spot != "":
+            query["Sweet Spot"]['$gte'] = int(min_sweet_spot)
+
+        if max_sweet_spot and max_sweet_spot != "":
+            query["Sweet Spot"]['$lte'] = int(max_sweet_spot) 
+        
+        #position filter 
+        if position and len(position) > 0:
+               query["Position"] = { "$regex": str(position) , }
+                
+        #stage filter if it only selected without ranking filter selector 
+        if newstage and len(newstage) > 0:
+                                
+            newstageitems=''
+            
+            for sitem in range(len(newstage)):
+                #list that have no records at all and will cause errors
+                if sitem < (len(newstage)-1):
+                  newstageitems=  newstageitems + str(newstage[sitem]) +"|"
+                else :
+                  newstageitems = newstageitems + str(newstage[sitem])
+                    
+            query["Sector & Stage Rankings"] = { "$regex": str(newstageitems) }
+            
+            #for multiple selection get first selection (first element on list)
+            #query["Sector & Stage Rankings"] = { "$regex": str(newstage[0]) , "$options" : "$" }
+
+            #single selection  (not a list)
+            #query["Sector & Stage Rankings"] = { "$regex": str(newstage) , }
+            
+
 
         if stage and len(stage) > 0:
-            query["stage"] = { "$in": stage }
+            #match any
+            query["Sector & Stage Rankings"] = { "$in": stage }
+            
+            #match all
             if stage_match_all:
-              query["stage"] = { "$all": stage }
-        
+              query["Sector & Stage Rankings"] = { "$all": stage }
 
+        #combine stage(newstage) and sectors&stage rankings(stage) filters when exist
+        #because the last code is the one that impacts the final query for the same object int his example 'stage
+                
+        #new stage filter
+        if newstage and len(newstage) > 0 and stage and len(stage) > 0:
+           
+            newstageitems=''
+
+            for sitem in range(len(newstage)):
+                #list that have no records at all and will cause errors
+                if sitem < (len(newstage)-1):
+                  newstageitems=  newstageitems + str(newstage[sitem]) +"|"
+                else :
+                  newstageitems = newstageitems + str(newstage[sitem])
+            
+            #oldstage match any
+            query["Sector & Stage Rankings"] = { "$in": stage,"$regex": str(newstageitems) }
+            
+            #oldstage match all
+            if stage_match_all:
+                  query["Sector & Stage Rankings"] = { "$all": stage,"$regex": str(newstageitems) }
+
+            
+            
         if (min_invs_connect and min_invs_connect != "") or (max_invs_connect and max_invs_connect != ""):
-            query["Investing Connections"] = {}
-            query["Investing Connections"]["$exists"] = True
+            query["Investing connections amount"] = {}
+            query["Investing connections amount"]["$exists"] = True
 
         if min_invs_connect and min_invs_connect != "":
-            query["Investing Connections"]['$gte'] = int(min_invs_connect)
-        
-        if max_invs_connect and max_invs_connect != "":
-            query["Investing Connections"]['$lte'] = int(max_invs_connect)
-        
-        # if min_investment and min_investment != "":
-        #     query["min_investment"] = {"$exists": True, '$gte': int(min_investment)}
-        
-        # if max_investment and max_investment != "":
-        #     query["max_investment"] = {"$exists": True, '$lte': int(max_investment)}
-        
-        print(query)
+            query["Investing connections amount"]['$gte'] = int(min_invs_connect)
 
-        signal_invest_data = db.signalNFXInvestors
+        if max_invs_connect and max_invs_connect != "":
+            query["Investing connections amount"]['$lte'] = int(max_invs_connect)
+            
+        
+        print("MongoDB Query : "+ str(query))
+
+        #Hamed is data only
+        #signal_invest_data = db.signalNFXInvestors
+        
+        #merged data from hesham and hamed 
+        signal_invest_data = db.signalMerge
         
         #Logic for pagination
         offset = int(request.args.get('offset',0))
+        print(offset)
         limit = 10
         
         starting_id = signal_invest_data.find(query).sort('_id', pymongo.ASCENDING)
+
         try:
           last_id = starting_id[offset]['_id']
         except:
           last_id = None
-
+        
+        # Counting Query Documents Vs. Total Documents
+        query_count = signal_invest_data.count_documents(query)
+        
+        total_count = signal_invest_data.count_documents({})
+        
+        #failed try from hesham to fix it
+        #if total_count < limit :
+        #   limit=total_count
+            
+    
         next_chunk = offset + limit
         prev_chunk = 0
         if offset - limit > 0:
             prev_chunk = offset - limit
 
-        # Counting Query Documents Vs. Total Documents
-        query_count = signal_invest_data.count_documents(query)
-        total_count = signal_invest_data.count_documents({})
-        
         if last_id:
           json_data = signal_invest_data.find({**query, **{"_id": {'$gte': last_id}}}, limit=limit)
         else:
-          json_data = []
+          json_data = []        
 
+            
         return jsonify({
             "investors": loads(dumps(json_data)),
             "total_count": total_count,
