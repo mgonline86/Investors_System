@@ -63,8 +63,12 @@
                 <label class="form-check-label" for="stage-all-check">Match All selected options</label>
             </div>
             <hr>
-
-            
+            <div class="mb-3">
+                <label for="searchProfileName" class="form-label">Profile Name</label>
+                <input type="text" class="form-control searchInput" id="searchProfileName" placeholder="Search..." autocomplete="off" oninput="handleSearchProflieName()">
+                <p class="mx-1 p-2 d-none searchSugg">0 Matches</p>
+            </div>
+            <hr>
             {#<div class="col-auto">
                 <label for="example-select-2" class="form-label">Another label</label>
                 <div id="example-select-2"></div>

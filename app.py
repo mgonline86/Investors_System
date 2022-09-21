@@ -16,13 +16,7 @@ from bson.json_util import dumps
 from json import loads
 import pymongo
 
-'''
-API_KEY = os.getenv('API_KEY')
-API_PASS = os.getenv('API_PASS')
-API_TOKEN = os.getenv('API_TOKEN')
-API_HOST = os.getenv('API_HOST')
-# SECRET_KEY = os.getenv('SECRET_KEY')
-'''
+
 app = Flask(__name__)
 # app.secret_key = SECRET_KEY
 
@@ -104,7 +98,6 @@ def handle_signal_investors():
     try:
         query = {}
         body = request.get_json()
-        print(body)
 
         min_sweet_spot = body.get("min_sweet_spot")
         max_sweet_spot = body.get("max_sweet_spot")
@@ -114,6 +107,9 @@ def handle_signal_investors():
         position = body.get("position")
         
         stage = body.get("stage")
+
+        profile_name = body.get("profile_name")
+
         try:
             stage_match_all = body.get("stage_match_all")
         except:
@@ -206,6 +202,9 @@ def handle_signal_investors():
         if max_invs_connect and max_invs_connect != "":
             query["Investing connections amount"]['$lte'] = int(max_invs_connect)
             
+        if profile_name and profile_name != "":
+            query["Profile Name"] = { "$regex": profile_name, "$options" :'i' }
+            
         
         print("MongoDB Query : "+ str(query))
 
@@ -217,7 +216,6 @@ def handle_signal_investors():
         
         #Logic for pagination
         offset = int(request.args.get('offset',0))
-        print(offset)
         limit = 10
         
         starting_id = signal_invest_data.find(query).sort('_id', pymongo.ASCENDING)
@@ -267,6 +265,24 @@ def handle_signal_investors():
             "prev_chunk": 0,
         })
 
+
+# Count_Investors Route
+@app.route('/api/investors/count', methods=["POST"])
+@login_required
+def countInvestors():
+  try:
+    signal_invest_data = db.signalMerge
+    body = request.get_json()
+    field = body.get("field")
+    query = body.get("query")
+    count = signal_invest_data.count_documents({ field: { "$regex": query, "$options" :'i' } })
+    return jsonify({
+      "count" : count,
+    })
+  except:
+    return jsonify({
+      "count" : 0,
+    })
 
 
 # User-Routes

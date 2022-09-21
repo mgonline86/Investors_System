@@ -10,6 +10,7 @@ var query = {
     min_investment: "",
     max_investment: "",
     position:[],
+    profile_name: "",
 }
 var prev_chunk = 0
 var next_chunk = 0
@@ -54,13 +55,28 @@ async function get_signal_inv(page_chunk = null) {
 
                 // Appending main image to the list element
                 if (current_investor["images"].length !== 0) {
+                    let div = document.createElement('div');
+                    div.style.cssText = 'position:relative';
+                    div.classList.add("invest-img_container")
+                    
                     let img = document.createElement('img');
                     img.src = current_investor["images"][0];
                     img.classList.add("img-fluid")
-                    li.appendChild(img)
+                    img.classList.add("invest-img")
+                        
+                    let icon = document.createElement('i');
+                    icon.classList.add("bi")
+                    icon.classList.add("bi-zoom-in")
+                    icon.classList.add("img-zoom")
+                    
+
+                    div.appendChild(img)
+                    div.appendChild(icon)
+                    
+                    li.appendChild(div)
                 }
                 
-                // Appending Full name ( Profile Name ) to the list element
+                // Appending Profile Name to the list element
                 if (current_investor["Profile Name"]) {
                     let h3 = document.createElement('h3');
                     h3.textContent = current_investor["Profile Name"];
@@ -594,6 +610,53 @@ const handleMaxInvCon = () => {
     var maxConnValue = document.getElementById("max-invs-connect").value;
     query.max_invs_connect = maxConnValue;
 }
+
+
+// HANDLE SEARCH INPUTS MECHANISM
+let searchInputs = document.querySelectorAll(".searchInput")
+
+searchInputs.forEach(searchInput => {
+    searchInput.addEventListener('focus',(event) => {
+      event.target.nextElementSibling.classList.remove("d-none");
+    })
+    undefined
+    searchInput.addEventListener('blur',(event) => {
+      event.target.nextElementSibling.classList.add("d-none");
+    })
+});
+
+// Handle Search Profile Name
+const handleSearchProflieName = debounce(() => {
+    let searchProfileName = document.getElementById("searchProfileName");
+    let searchValue = searchProfileName.value.trim();
+    query.profile_name = searchValue
+    if (searchValue !== "") {
+        let url = "/api/investors/count";
+        fetch(url, {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                "field" : "Profile Name",
+                "query" : searchValue,
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            try {
+                searchProfileName.nextElementSibling.textContent = String(data.count) + " Matches for " + searchValue
+            }
+            catch(err){
+                console.log(err)
+            }
+        })
+    }
+    else{
+        searchProfileName.nextElementSibling.textContent = "0 Matches"
+    }
+})
 
 // // Handle Investor amount
 // const handleMinInvest = () => {
