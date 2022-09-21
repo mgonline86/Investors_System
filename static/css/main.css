@@ -47,3 +47,35 @@ a.nostyle:visited {
     max-width: 100px !important;
     border-radius: 10px;
 }
+
+
+/* Image-Zoom */
+.invest-img_container{
+    display: grid;
+    justify-items: center;
+    justify-content: start;
+    align-items: center;
+}
+
+.invest-img, .img-zoom{
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.img-zoom{
+    font-size: xx-large;
+    cursor: pointer;
+    z-index: 10;
+    color: transparent;
+}
+
+.img-zoom:hover{
+    color: black;
+}
+
+
+/* Search Suggestions */
+.searchSugg{
+    border: solid gray 1px;
+    border-top: none;
+}

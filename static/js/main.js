@@ -31,3 +31,13 @@ function hide_load_btn(currentTarget) {
   spinner_element.classList.add("hidden");
   currentTarget.disabled = false;
 }
+
+// Debounce Any passed Function for Any Passed Time (default = 300ms)
+function debounce(func, timeout = 300){
+  /** Debounce Any Given Function */
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => { func.apply(this, args); }, timeout);
+  };
+}

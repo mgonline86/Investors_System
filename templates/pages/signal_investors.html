@@ -7,7 +7,7 @@
 {% block content %}
 <div class="row mb-2">
     <button class="col-2 mx-2 btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasWithBothOptions" aria-controls="offcanvasWithBothOptions">Open Filters</button>
-    <button class="col-2 mx-2 btn btn-success" onclick="get_signal_inv()">Run your Query</button>
+    <button class="col-2 mx-2 btn btn-success" onclick="get_signal_inv()">Apply your filter</button>
 </div>
 <h2 class="mb-2">
     Showing <span id="query_count"></span> of <span id="total_count"></span> (<span id="count_percent"></span>%)
@@ -20,13 +20,53 @@
     </div>
     <div class="offcanvas-body">
         <form class="row gy-2 gx-3 align-items-center">
+            <h3>All filters are still in progress (not accurate)</h3>
+            
+            <div class="col-auto">
+                <h6>Sweet Spot</h6>
+                <div class="row">
+                    <div class="col">
+                        <label for="min-sweet-spot" class="form-label">Min</label>
+                        <input type="number" class="form-control" min="0" max="99999999" step="1" id="min-sweet-spot" onchange="handleMinSweet()" >
+                    </div>
+                    <div class="col">
+                        <label for="max-sweet-spot" class="form-label">Max</label>
+                        <input type="number" class="form-control" min="0" max="99999999" step="1" id="max-sweet-spot" onchange="handleMaxSweet()" >
+                    </div>
+                </div>
+            </div>
+            <hr>
+            
+            <div class="col-12" >
+                <label for="position-select" class="col-12 form-label h6">Position</label>
+                <div id="position-select"></div>
+            </div>
+            <hr>
+
+                
+            <div class="col-12" >
+                <label for="new-stage-select" class="col-12 form-label h6">Stage</label>
+                <p>Match any of the selected options</p>
+                <div id="new-stage-select"></div>
+            </div>
+            <hr>
+
+            
             <div class="col-12">
-                <label for="stage-select" class="col-12 form-label h6">Stage</label>
+                <label for="stage-select" class="col-12 form-label h6">Is on these SECTOR & STAGE RANKINGS</label>
+                <p>Match any of the selected options</p>
+                
                 <div id="stage-select"></div>
             </div>
             <div class="form-check form-switch">
                 <input class="form-check-input" type="checkbox" role="switch" id="stage-all-check" onchange="handleStageMatchAll()">
-                <label class="form-check-label" for="stage-all-check">Match All</label>
+                <label class="form-check-label" for="stage-all-check">Match All selected options</label>
+            </div>
+            <hr>
+            <div class="mb-3">
+                <label for="searchProfileName" class="form-label">Profile Name</label>
+                <input type="text" class="form-control searchInput" id="searchProfileName" placeholder="Search..." autocomplete="off" oninput="handleSearchProflieName()">
+                <p class="mx-1 p-2 d-none searchSugg">0 Matches</p>
             </div>
             <hr>
             {#<div class="col-auto">
@@ -34,15 +74,15 @@
                 <div id="example-select-2"></div>
             </div>#}
             <div class="col-auto">
-                <h6>Investor connections amount</h6>
+                <h6>Investor connections amount (still under developement not functional)</h6>
                 <div class="row">
                     <div class="col">
                         <label for="min-invs-connect" class="form-label">Min</label>
-                        <input type="number" class="form-control" min="0" max="99999" step="1" id="min-invs-connect" onchange="handleMinInvCon()">
+                        <input type="number" class="form-control" min="0" max="99999" step="1" id="min-invs-connect" onchange="handleMinInvCon()" >
                     </div>
                     <div class="col">
                         <label for="max-invs-connect" class="form-label">Max</label>
-                        <input type="number" class="form-control" min="0" max="99999" step="1" id="max-invs-connect" onchange="handleMaxInvCon()">
+                        <input type="number" class="form-control" min="0" max="99999" step="1" id="max-invs-connect" onchange="handleMaxInvCon()" >
                     </div>
                 </div>
             </div>
