@@ -17,6 +17,15 @@ var next_chunk = 0
 
 async function get_signal_inv(page_chunk = null) {
     show_load_layout();
+
+    //Validate Inputs
+    var valid = validate_inputs();
+
+    if (!valid) {
+        hide_load_layout();
+        return
+    }
+
     var signal_inv_element = document.getElementById("signal_inv");
 
     signal_inv_element.innerHTML = "";
@@ -63,15 +72,18 @@ async function get_signal_inv(page_chunk = null) {
                     img.src = current_investor["images"][0];
                     img.classList.add("img-fluid")
                     img.classList.add("invest-img")
-                        
-                    let icon = document.createElement('i');
-                    icon.classList.add("bi")
-                    icon.classList.add("bi-zoom-in")
-                    icon.classList.add("img-zoom")
+                    
+                    let zoomOverlay = document.createElement('img');
+                    zoomOverlay.src = "/static/img/zoom-in.png";
+                    zoomOverlay.classList.add("img-zoom")
+                    zoomOverlay.setAttribute("data-toggle", "modal");
+                    zoomOverlay.setAttribute("data-target", "#viewImageModal");
+                    zoomOverlay.onclick = function() { toggleviewImageModal(this) }
+                    //data-toggle="modal" data-target="#exampleModalCenter"
                     
 
                     div.appendChild(img)
-                    div.appendChild(icon)
+                    div.appendChild(zoomOverlay)
                     
                     li.appendChild(div)
                 }
@@ -137,9 +149,6 @@ async function get_signal_inv(page_chunk = null) {
     });
 
 }
-
-// Call Get signal_inv data function
-get_signal_inv();
 
 /** HANDLING FILTERS */
 //added by hesham
@@ -658,12 +667,56 @@ const handleSearchProflieName = debounce(() => {
     }
 })
 
-// // Handle Investor amount
-// const handleMinInvest = () => {
-//     var minInvValue = document.getElementById("min-investment").value;
-//     query.min_investment = minInvValue;
-// }
-// const handleMaxInvest = () => {
-//     var maxInvValue = document.getElementById("max-investment").value;
-//     query.max_investment = maxInvValue;
-// }
+// Handle Investor amount
+const handleMinInvest = () => {
+    var minInvValue = document.getElementById("min-investment").value;
+    query.min_investment = minInvValue;
+}
+const handleMaxInvest = () => {
+    var maxInvValue = document.getElementById("max-investment").value;
+    query.max_investment = maxInvValue;
+}
+
+
+// Validate Critical Inputs
+const validate_inputs = () =>{
+    // Clear any in-valid classes on inputs
+    var inputElements = document.querySelectorAll(".form-control")
+    inputElements.forEach(ele => {
+        ele.classList.remove("is-invalid");
+    })
+
+    // Validate Investment Range 
+    const filtersOffcanvas = new bootstrap.Offcanvas('#filtersOffcanvas')
+    var minInvEle = document.getElementById("min-investment");
+    var maxInvEle = document.getElementById("max-investment");
+    var minInvValue = minInvEle.value;
+    var maxInvValue = maxInvEle.value;
+
+    if (minInvValue.trim() !== "" && maxInvValue.trim() === "") {
+        filtersOffcanvas.show()
+        maxInvEle.classList.add("is-invalid");
+        maxInvEle.focus();
+        return false;
+    }
+    if (maxInvValue.trim() !== "" && minInvValue.trim() === "") {
+        filtersOffcanvas.show()
+        minInvEle.classList.add("is-invalid");
+        minInvEle.focus();
+        return false;
+    }
+
+    return true
+}
+
+
+// View Large Image handler
+const toggleviewImageModal = (event) => {
+    var imgSrc = event.parentElement.querySelector('.invest-img').src;
+    var modal = $('#viewImageModal');
+    modal.modal('show')
+    modal.find('.modal-body img').attr('src', imgSrc)
+}
+
+// Call Get signal_inv data function
+get_signal_inv();

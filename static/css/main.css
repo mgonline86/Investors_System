@@ -44,17 +44,16 @@ a.nostyle:visited {
 /** Investors List **/
 /* Image */
 #signal_inv li img{
-    max-width: 100px !important;
     border-radius: 10px;
 }
 
 
 /* Image-Zoom */
 .invest-img_container{
+    max-width: 100px !important;
     display: grid;
-    justify-items: center;
-    justify-content: start;
-    align-items: center;
+    justify-items: end;
+    align-items: end;
 }
 
 .invest-img, .img-zoom{
@@ -63,14 +62,12 @@ a.nostyle:visited {
 }
 
 .img-zoom{
-    font-size: xx-large;
+    max-width: 30%;
+    border-radius: 10px 0 !important;
+    padding: 5px;
+    background-color: #ffffffa1;
     cursor: pointer;
-    z-index: 10;
-    color: transparent;
-}
-
-.img-zoom:hover{
-    color: black;
+    z-index: 2;
 }
 
 

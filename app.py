@@ -118,11 +118,6 @@ def handle_signal_investors():
         min_invs_connect = body.get("min_invs_connect")
         max_invs_connect = body.get("max_invs_connect")
 
-        ### I commented min and max invest until fixing data type in db from str to int ###
-
-        # min_investment = body.get("min_investment")
-        # max_investment = body.get("max_investment")
-        
         #sweet spot filter
         if (min_sweet_spot and min_sweet_spot != "") or (max_sweet_spot and max_sweet_spot != ""):
             query["Sweet Spot"] = {}
@@ -206,6 +201,24 @@ def handle_signal_investors():
             query["Profile Name"] = { "$regex": profile_name, "$options" :'i' }
             
         
+        #investment range filter
+        min_investment = body.get("min_investment")
+        max_investment = body.get("max_investment")
+        
+        if min_investment and min_investment != "" and max_investment and max_investment != "":
+            query["min_investment"] = {}
+            query["min_investment"]["$exists"] = True
+            query["max_investment"] = {}
+            query["max_investment"]["$exists"] = True
+
+            query["min_investment"]['$gte'] = int(min_investment)
+            query["max_investment"]['$gte'] = int(min_investment)
+
+            query["min_investment"]['$lte'] = int(max_investment) 
+            query["max_investment"]['$lte'] = int(max_investment) 
+
+
+
         print("MongoDB Query : "+ str(query))
 
         #Hamed is data only
