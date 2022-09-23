@@ -5,17 +5,34 @@
 {% endblock %}
 {% block signal_inv_active %}active{% endblock %}
 {% block content %}
-<div class="row mb-2">
-    <button class="col-2 mx-2 btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasWithBothOptions" aria-controls="offcanvasWithBothOptions">Open Filters</button>
-    <button class="col-2 mx-2 btn btn-success" onclick="get_signal_inv()">Apply your filter</button>
+<!-- Image Preview Modal -->
+<div class="modal fade" id="viewImageModal" tabindex="-1" role="dialog" aria-labelledby="viewImageModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <img class="img-fluid" src="" alt="Full Image"/>
+        </div>
+      </div>
+    </div>
 </div>
-<h2 class="mb-2">
-    Showing <span id="query_count"></span> of <span id="total_count"></span> (<span id="count_percent"></span>%)
-</h2>
 
-<div class="offcanvas offcanvas-start" data-bs-scroll="true" tabindex="-1" id="offcanvasWithBothOptions" aria-labelledby="offcanvasWithBothOptionsLabel">
+<!-- Filter Control Row -->
+<div class="sticky-top bg-white py-2">
+    <div class="row mb-2">
+        <button class="col col-md-3 m-2 btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#filtersOffcanvas" aria-controls="filtersOffcanvas">Open Filters</button>
+        <button class="col col-md-3 m-2 btn btn-success" onclick="get_signal_inv()">Apply your filter</button>
+    </div>
+    <h2 class="mb-2">
+        Showing <span id="query_count"></span> of <span id="total_count"></span> (<span id="count_percent"></span>%)
+    </h2>
+</div>
+
+<div class="offcanvas offcanvas-start" data-bs-scroll="true" tabindex="-1" id="filtersOffcanvas" aria-labelledby="filtersOffcanvasLabel">
     <div class="offcanvas-header">
-      <h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel">Filters</h5>
+      <h5 class="offcanvas-title" id="filtersOffcanvasLabel">Filters</h5>
       <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body">
@@ -69,10 +86,6 @@
                 <p class="mx-1 p-2 d-none searchSugg">0 Matches</p>
             </div>
             <hr>
-            {#<div class="col-auto">
-                <label for="example-select-2" class="form-label">Another label</label>
-                <div id="example-select-2"></div>
-            </div>#}
             <div class="col-auto">
                 <h6>Investor connections amount (still under developement not functional)</h6>
                 <div class="row">
@@ -86,19 +99,30 @@
                     </div>
                 </div>
             </div>
-            {#<div class="col-auto">
-                <h6>Investment amount</h6>
+            <hr>
+            <div class="col-auto">
+                <h6>Investment Amount</h6>
                 <div class="row">
                     <div class="col">
                         <label for="min-investment" class="form-label">Min</label>
-                        <input type="number" class="form-control" min="0" max="1000000000" step="1000" id="min-investment" onchange="handleMinInvest()">
+                        <div class="input-group has-validation">
+                            <input type="number" class="form-control" min="0" max="1000000000" step="1000" id="min-investment" onchange="handleMinInvest()">
+                            <div class="invalid-feedback">
+                                Please Add a Value Here!
+                            </div>
+                        </div>
                     </div>
                     <div class="col">
                         <label for="max-investment" class="form-label">Max</label>
-                        <input type="number" class="form-control" min="0" max="1000000000" step="1000" id="max-investment" onchange="handleMaxInvest()">
+                        <div class="input-group has-validation">
+                            <input type="number" class="form-control" min="0" max="1000000000" step="1000" id="max-investment" onchange="handleMaxInvest()">
+                            <div class="invalid-feedback">
+                                Please Add a Value Here!
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>#}
+            </div>
         </form>
     </div>
 </div>
