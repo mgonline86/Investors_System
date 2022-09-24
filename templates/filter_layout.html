@@ -1,0 +1,73 @@
+{% extends '/flask_user_layout.html' %}
+{% block signal_inv_active %}active{% endblock %}
+{% block content %}
+<!-- Image Preview Modal -->
+<div class="modal fade" id="viewImageModal" tabindex="-1" role="dialog" aria-labelledby="viewImageModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <img class="img-fluid" src="" alt="Full Image"/>
+        </div>
+      </div>
+    </div>
+</div>
+
+<!-- Filter Control Row -->
+<div class="sticky-top bg-white py-2">
+    <!-- Page Breadcrumb -->
+    <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+        <ol class="breadcrumb ">
+            <li class="breadcrumb-item {% block bCrumbSignalActive %}{% endblock %}" {% block bCrumbSignalCurrent %}{% endblock %}>{% block bCrumbSignalAnchor %}{% endblock %}</li>
+            <li class="breadcrumb-item {% block bCrumbLinkedInActive %}{% endblock %}" {% block bCrumbLinkedInCurrent %}{% endblock %}>{% block bCrumbLinkedInAnchor %}{% endblock %}</li>
+        </ol>
+    </nav>
+    <div class="row mb-2">
+        <button class="col col-md-3 m-2 btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#filtersOffcanvas" aria-controls="filtersOffcanvas">Open Filters</button>
+        <button class="col col-md-3 m-2 btn btn-success" onclick="get_inv()">Apply your filter</button>
+        <button class="col col-md-3 m-2 btn btn-danger" onclick="clear_filters()">Clear Filters</button>
+    </div>
+    <h2>
+        Showing <span id="query_count"></span> of <span id="total_count"></span> (<span id="count_percent"></span>%)
+    </h2>
+    {% block excluded_count %}{% endblock %}
+</div>
+
+<div class="offcanvas offcanvas-start" data-bs-scroll="true" tabindex="-1" id="filtersOffcanvas" aria-labelledby="filtersOffcanvasLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="filtersOffcanvasLabel">Filters</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        {% block filtersCanvasBody %}
+        {% endblock %}
+    </div>
+</div>
+
+    <div class="row">
+        <div class="col mx-auto">
+            {% block filtersResultsRow %}
+            {% endblock %}
+            <nav class="fixed-bottom" aria-label="Page navigation example">
+                <ul class="pagination justify-content-center">
+                <li class="page-item">
+                    <a id="prev-link" class="page-link" href="#" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                    <span class="sr-only">Previous</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a id="next-link" class="page-link" href="#" aria-label="Next">
+                        <span class="sr-only">Next</span>
+                    <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+
+{% endblock %}

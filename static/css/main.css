@@ -43,7 +43,7 @@ a.nostyle:visited {
 
 /** Investors List **/
 /* Image */
-#signal_inv li img{
+#inv_list li img{
     border-radius: 10px;
 }
 

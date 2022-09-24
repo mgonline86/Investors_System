@@ -1,16 +1,17 @@
 {% extends '/filter_layout.html' %}
-{% block title %}SIGNAL INVESTORS{% endblock %}
+{% block title %}LINKEDIN INVESTORS{% endblock %}
 {% block style %}
     <link rel="stylesheet" href="/static/virtual-select-master/virtual-select.min.css" />
 {% endblock %}
 
 <!-- Breadcrumb Options -->
 <!-- Signal Breadcrumb -->
-{% block bCrumbSignalActive %}active{% endblock %}
-{% block bCrumbSignalCurrent %}aria-current="page"{% endblock %}
-{% block bCrumbSignalAnchor %}Signal{% endblock %}
+{% block bCrumbSignalAnchor %}<a href="/signal_investors">Signal</a>{% endblock %}</li>
 <!-- LinkedIn Breadcrumb -->
-{% block bCrumbLinkedInAnchor %}<a href="/linkedin_investors">LinkedIn</a>{% endblock %}</li>
+{% block bCrumbLinkedInActive %}active{% endblock %}
+{% block bCrumbLinkedInCurrent %}aria-current="page"{% endblock %}
+{% block bCrumbLinkedInAnchor %}LinkedIn{% endblock %}
+
 
 {% block filtersCanvasBody %}
         <form class="row gy-2 gx-3 align-items-center">
@@ -103,6 +104,9 @@
         </form>
 {% endblock %}
 
+{% block excluded_count %}
+    <small id="excluded_count" class="text-danger"></small>
+{% endblock %}
 
 {% block filtersResultsRow %}
     <ul class="list-group-flush" id="inv_list"></ul>
@@ -111,8 +115,8 @@
 {% block js %}
     <script src="/static/virtual-select-master/virtual-select.min.js"></script>
     <script>
-        // Get signal_inv data function
-        var blank_signal_query = {
+        // Get linkedin_inv data function
+        var blank_linkedin_query = {
             min_sweet_spot: "",
             max_sweet_spot: "",
             position:"",
@@ -126,8 +130,8 @@
             max_investment: "",
         };
 
-        var signal_query = {{ signal_query | tojson }} || blank_signal_query;
+        var linkedin_query = {{ linkedin_query | tojson }} || blank_linkedin_query;
 
     </script>
-    <script src="/static/js/signal_inv.js"></script>
+    <script src="/static/js/linkedin_inv.js"></script>
 {% endblock %}

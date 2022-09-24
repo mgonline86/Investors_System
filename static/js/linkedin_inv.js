@@ -29,11 +29,11 @@ async function get_inv(page_chunk = null) {
         return
     }
 
-    var signal_inv_element = document.getElementById("inv_list");
+    var linkedin_inv_element = document.getElementById("inv_list");
 
-    signal_inv_element.innerHTML = "";
+    linkedin_inv_element.innerHTML = "";
 
-    var base_url = '/api/investors/signal'
+    var base_url = '/api/investors/linkedin'
 
     var url = page_chunk ? base_url + "?offset=" + String(page_chunk) : base_url;
 
@@ -43,6 +43,7 @@ async function get_inv(page_chunk = null) {
     var query_count_ele = document.getElementById("query_count");
     var total_count_ele = document.getElementById("total_count");
     var count_percent_ele = document.getElementById("count_percent");
+    var excluded_count_ele = document.getElementById("excluded_count");
 
 
     fetch(url, {
@@ -51,12 +52,12 @@ async function get_inv(page_chunk = null) {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(signal_query)
+        body: JSON.stringify(linkedin_query)
     })
     .then(response => response.json())
     .then(data => {
         try {
-            var {investors, total_count, query_count, next_chunk, prev_chunk, limit} = data
+            var {investors, total_count, query_count, next_chunk, prev_chunk, limit, has_linkedin_count, no_linkedin_count} = data
             if (investors.length > 0) {
               for (let i = 0; i < investors.length; i++) {
                 let current_investor = investors[i]
@@ -110,7 +111,7 @@ async function get_inv(page_chunk = null) {
                 li.appendChild(
                     renderjson(current_investor)
                 );
-                signal_inv_element.appendChild(li);
+                linkedin_inv_element.appendChild(li);
             }
             }
             else{
@@ -119,7 +120,7 @@ async function get_inv(page_chunk = null) {
                     p.classList.add("h3")
                     p.classList.add("text-info")
                     p.textContent = "NO RESULT FOUND!";
-                    signal_inv_element.appendChild(p)
+                    linkedin_inv_element.appendChild(p)
             }
             
             prev_btn.onclick = function() { get_inv(prev_chunk) }
@@ -144,6 +145,7 @@ async function get_inv(page_chunk = null) {
             query_count_ele.textContent = query_count
             total_count_ele.textContent = total_count
             count_percent_ele.textContent = ((query_count/total_count)*100).toFixed(3)
+            excluded_count_ele.textContent = "(" + String(no_linkedin_count) + " results were excluded, having no LinkedIn Profile)"
 
             hide_load_layout();
         } catch (err) {
@@ -184,7 +186,7 @@ VirtualSelect.init({
 });
 
 document.querySelector('#new-stage-select').addEventListener('change', function() {
-    signal_query.newstage = this.value;
+    linkedin_query.newstage = this.value;
 });
 ///// added by hesham
 
@@ -193,17 +195,17 @@ document.querySelector('#new-stage-select').addEventListener('change', function(
 const handleStageMatchAll = () => {
     var stageMatchAll = document.getElementById("stage-all-check").checked;
     console.log(stageMatchAll)
-    signal_query.stage_match_all = stageMatchAll;
+    linkedin_query.stage_match_all = stageMatchAll;
 }
 
 //Handle sweet_spot filter
 const handleMinSweet = () => {
     var minSweetValue = document.getElementById("min-sweet-spot").value;
-    signal_query.min_sweet_spot = minSweetValue;
+    linkedin_query.min_sweet_spot = minSweetValue;
 }
 const handleMaxSweet = () => {
     var maxSweetValue = document.getElementById("max-sweet-spot").value;
-    signal_query.max_sweet_spot = maxSweetValue;
+    linkedin_query.max_sweet_spot = maxSweetValue;
 }
 
 
@@ -211,11 +213,11 @@ const handleMaxSweet = () => {
 // Handle Investor connections amount
 const handleMinInvCon = () => {
     var minConnValue = document.getElementById("min-invs-connect").value;
-    signal_query.min_invs_connect = minConnValue;
+    linkedin_query.min_invs_connect = minConnValue;
 }
 const handleMaxInvCon = () => {
     var maxConnValue = document.getElementById("max-invs-connect").value;
-    signal_query.max_invs_connect = maxConnValue;
+    linkedin_query.max_invs_connect = maxConnValue;
 }
 
 
@@ -236,9 +238,9 @@ searchInputs.forEach(searchInput => {
 const handleSearchProflieName = debounce(async () => {
     let searchProfileName = document.getElementById("searchProfileName");
     let searchValue = searchProfileName.value.trim();
-    signal_query.profile_name = searchValue
+    linkedin_query.profile_name = searchValue
     if (searchValue !== "") {
-        let url = "/api/investors/signal/count";
+        let url = "/api/investors/linkedin/count";
         fetch(url, {
             method: "POST",
             headers: {
@@ -268,11 +270,11 @@ const handleSearchProflieName = debounce(async () => {
 // Handle Investor amount
 const handleMinInvest = () => {
     var minInvValue = document.getElementById("min-investment").value;
-    signal_query.min_investment = minInvValue;
+    linkedin_query.min_investment = minInvValue;
 }
 const handleMaxInvest = () => {
     var maxInvValue = document.getElementById("max-investment").value;
-    signal_query.max_investment = maxInvValue;
+    linkedin_query.max_investment = maxInvValue;
 }
 
 
@@ -319,17 +321,17 @@ const toggleviewImageModal = (event) => {
 // Update Filter Input Fields with Query Values
 const updateFilters = async () =>{
     try {
-        minSweetSpotInput.value = signal_query.min_sweet_spot;
-        maxSweetSpotInput.value = signal_query.max_sweet_spot;
-        positionInput.setValue(signal_query.position)
-        newStageInput.setValue(signal_query.newstage)
-        stageInput.setValue(signal_query.stage)
-        stageAllCheckInput.checked = signal_query.stage_match_all
-        profileNameInput.value = signal_query.profile_name;
-        minInvsConnctInput.value = signal_query.min_invs_connect
-        maxInvsConnctInput.value = signal_query.max_invs_connect
-        minInvsInput.value = signal_query.min_investment
-        maxInvsInput.value = signal_query.max_investment
+        minSweetSpotInput.value = linkedin_query.min_sweet_spot;
+        maxSweetSpotInput.value = linkedin_query.max_sweet_spot;
+        positionInput.setValue(linkedin_query.position)
+        newStageInput.setValue(linkedin_query.newstage)
+        stageInput.setValue(linkedin_query.stage)
+        stageAllCheckInput.checked = linkedin_query.stage_match_all
+        profileNameInput.value = linkedin_query.profile_name;
+        minInvsConnctInput.value = linkedin_query.min_invs_connect
+        maxInvsConnctInput.value = linkedin_query.max_invs_connect
+        minInvsInput.value = linkedin_query.min_investment
+        maxInvsInput.value = linkedin_query.max_investment
     } catch (err) {
         console.log(err)        
     }
@@ -338,7 +340,7 @@ const updateFilters = async () =>{
 
 // Fill the Option Lists in Filters
 const get_filters_options = async () => {
-    fetch("/api/investors/signal/options")
+    fetch("/api/investors/linkedin/options")
     .then(response => response.json())
     .then(data => {
         try {
@@ -358,7 +360,7 @@ const get_filters_options = async () => {
             });
             // Handle old stage filter
             document.querySelector('#stage-select').addEventListener('change', function() {
-                signal_query.stage = this.value;
+                linkedin_query.stage = this.value;
             });
 
             //Handle position filter
@@ -379,7 +381,7 @@ const get_filters_options = async () => {
             });
 
             document.querySelector('#position-select').addEventListener('change', function() {
-                signal_query.position = this.value;
+                linkedin_query.position = this.value;
             });
 
 
@@ -393,11 +395,11 @@ const get_filters_options = async () => {
 }
 
 const clear_filters = async () => {
-    signal_query = blank_signal_query;
+    linkedin_query = blank_linkedin_query;
     updateFilters();
     get_inv();
 }
 
-// Call Get signal_inv data function
+// Call Get linkedin_inv data function
 get_inv();
 get_filters_options();
