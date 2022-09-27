@@ -76,3 +76,11 @@ a.nostyle:visited {
     border: solid gray 1px;
     border-top: none;
 }
+
+/* Notifications Box */
+.alert-corner{
+    z-index: 999;
+    position: fixed;
+    bottom: 5vh;
+    right: 5vw;
+}

@@ -12,6 +12,10 @@
 <!-- LinkedIn Breadcrumb -->
 {% block bCrumbLinkedInAnchor %}<a href="/linkedin_investors">LinkedIn</a>{% endblock %}</li>
 
+{% block filter_ctrl_btns %}
+    <button class="col col-md-2 m-2 btn btn-warning" onclick="return get_inv(undefined, true)">Show Final Results</button>
+{% endblock %}
+
 {% block filtersCanvasBody %}
         <form class="row gy-2 gx-3 align-items-center">
             <h3>All filters are still in progress (not accurate)</h3>

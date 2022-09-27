@@ -1,6 +1,7 @@
 // GlOBAL VARIABLES
-var prev_chunk = 0
-var next_chunk = 0
+var prev_chunk = 0;
+var next_chunk = 0;
+var getFinalResult = false;
 
 
 // Define Filter Input Fields
@@ -18,7 +19,10 @@ var maxInvsInput = document.querySelector("#max-investment");
 
 
 
-async function get_inv(page_chunk = null) {
+async function get_inv(page_chunk = null, finalResults=false) {
+    // Toggle Final Results Flag    
+    getFinalResult = finalResults
+
     show_load_layout();
 
     //Validate Inputs
@@ -35,7 +39,25 @@ async function get_inv(page_chunk = null) {
 
     var base_url = '/api/investors/signal'
 
-    var url = page_chunk ? base_url + "?offset=" + String(page_chunk) : base_url;
+
+    // Creating Query Paramters for Pagination & FinalResults
+    var queryParams = []
+
+    if (page_chunk) {
+        var offset = "offset=" + String(page_chunk);
+        queryParams.push(offset)
+    }
+
+    if (getFinalResult) {
+        var finalResultTag = "finalResults=" + String(getFinalResult);
+        queryParams.push(finalResultTag)
+    }
+
+    if (queryParams.length > 0) {
+        base_url += "?"
+    }
+
+    var url = base_url + String(queryParams.join("&"));
 
     var prev_btn = document.getElementById("prev-link");
     var next_btn = document.getElementById("next-link");
@@ -122,8 +144,8 @@ async function get_inv(page_chunk = null) {
                     signal_inv_element.appendChild(p)
             }
             
-            prev_btn.onclick = function() { get_inv(prev_chunk) }
-            next_btn.onclick = function() { get_inv(next_chunk) }
+            prev_btn.onclick = function() { get_inv(prev_chunk, getFinalResult) }
+            next_btn.onclick = function() { get_inv(next_chunk, getFinalResult) }
 
             // disable prev_btn logic
             if(next_chunk - limit <= 0) {
@@ -226,7 +248,7 @@ searchInputs.forEach(searchInput => {
     searchInput.addEventListener('focus',(event) => {
       event.target.nextElementSibling.classList.remove("d-none");
     })
-    undefined
+
     searchInput.addEventListener('blur',(event) => {
       event.target.nextElementSibling.classList.add("d-none");
     })

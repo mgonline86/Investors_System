@@ -1,3 +1,4 @@
+from email.policy import default
 import os
 import requests
 from dotenv import load_dotenv
@@ -5,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()  # loading enviromental variable from .env files
 from flask import Flask, jsonify, render_template, request, session, flash, abort
 from flask_mongoengine import MongoEngine
-from flask_user import login_required, roles_required, UserManager, UserMixin
+from flask_user import login_required, roles_required, UserManager, UserMixin, current_user
 from config_user import ConfigClass, DB_USERNAME
 from wtforms import validators
 from wtforms import StringField
@@ -15,8 +16,11 @@ from db_setup import db
 from bson.json_util import dumps
 from json import loads
 import pymongo
+import json
 
 import time
+
+ENVIRONMENT = os.getenv('ENVIRONMENT')
 
 
 app = Flask(__name__)
@@ -44,6 +48,9 @@ class User(db_user.Document, UserMixin):
 
     # Relationships
     roles = db_user.ListField(db_user.StringField(), default=[])
+
+    # Filters
+    filters = db_user.DictField(default={})
 
 class UserInvitation(db_user.Document):
     email = db_user.StringField(default='')
@@ -89,12 +96,18 @@ def index():
 @app.route('/signal_investors')
 @login_required
 def signal_investors():
-    return render_template('pages/signal_investors.html',  signal_query=session.get("signal_query"))
+    user = User.objects(id=current_user.id).first()
+    signal_query = user.filters.get("signal_front")
+    # return render_template('pages/signal_investors.html',  signal_query=session.get("signal_query"))
+    return render_template('pages/signal_investors.html',  signal_query=signal_query)
 
 @app.route('/linkedin_investors')
 @login_required
 def linkedin_investors():
-    return render_template('pages/linkedin_investors.html',  linkedin_query=session.get("linkedin_query"))
+    user = User.objects(id=current_user.id).first()
+    linkedin_query = user.filters.get("linkedin_front")
+    # return render_template('pages/linkedin_investors.html',  linkedin_query=session.get("linkedin_query"))
+    return render_template('pages/linkedin_investors.html',  linkedin_query=linkedin_query)
 
 
 ### API ROUTES
@@ -103,11 +116,20 @@ def linkedin_investors():
 @login_required
 def handle_signal_investors():
     try:
+        #Hamed is data only
+        #signal_invest_data = db.signalNFXInvestors
+        
+        #merged data from hesham and hamed 
+        signal_invest_data = db.signalMerge
+        
         query = {}
+
         body = request.get_json()
         
         # Save Query to Session
         add_to_session("signal_query", body)
+        user = User.objects(id=current_user.id).first()
+        user.update(set__filters__signal_front=body)
 
         min_sweet_spot = body.get("min_sweet_spot")
         max_sweet_spot = body.get("max_sweet_spot")
@@ -227,26 +249,6 @@ def handle_signal_investors():
             query["min_investment"]['$lte'] = int(max_investment) 
             query["max_investment"]['$lte'] = int(max_investment) 
 
-
-
-        print("MongoDB Signal Query : "+ str(query))
-
-        #Hamed is data only
-        #signal_invest_data = db.signalNFXInvestors
-        
-        #merged data from hesham and hamed 
-        signal_invest_data = db.signalMerge
-        
-        #Logic for pagination
-        offset = int(request.args.get('offset',0))
-        limit = 10
-        
-        starting_id = signal_invest_data.find(query).sort('_id', pymongo.ASCENDING)
-
-        try:
-          last_id = starting_id[offset]['_id']
-        except:
-          last_id = None
         
         # Counting Query Documents Vs. Total Documents
         query_count = signal_invest_data.count_documents(query)
@@ -258,9 +260,37 @@ def handle_signal_investors():
         add_to_session("signal_total_count", total_count)
 
         if query_count < total_count:
-          add_to_session("signal_mongodb_query", query)
+          # add_to_session("signal_mongodb_query", query)
+          user.update(set__filters__signal_back=json.dumps(query))
+
         else:
-          add_to_session("signal_mongodb_query", {})
+          # add_to_session("signal_mongodb_query", {})
+          user.update(set__filters__signal_back=json.dumps({}))
+
+
+        # Get Final Results Logic
+        final_Results = str(request.args.get('finalResults',False))
+        if final_Results == "true":
+          #Final Database
+          final_database = db.signalMerge
+          final_query = json.loads(user.filters.get("linkedin_back"))
+          final_person_ids = final_database.distinct("person_id", final_query)
+          query["person_id"] = { "$in": final_person_ids }
+          query_count = signal_invest_data.count_documents(query)
+
+        
+        #Logic for pagination
+        offset = int(request.args.get('offset',0))
+        limit = 10
+        
+        starting_id = signal_invest_data.find(query).sort('_id', pymongo.ASCENDING)
+
+        try:
+          last_id = starting_id[offset]['_id']
+        except:
+          last_id = None
+
+        print("MongoDB Signal Query : "+ str(query))
     
         next_chunk = offset + limit
         prev_chunk = 0
@@ -342,6 +372,7 @@ def signal_filter_options():
 def handle_linkedin_investors():
 
     try:
+        user = User.objects(id=current_user.id).first()
 
         query = {}
         body = request.get_json()
@@ -350,11 +381,15 @@ def handle_linkedin_investors():
         linkedin_invest_data = db.signalMerge        
         
         # Save Query to Session
-        add_to_session("linkedin_query", body)
+        # add_to_session("linkedin_query", body)
+        user.update(set__filters__linkedin_front=body)
+        
 
         signal_invest_data = db.signalMerge
 
-        signal_mongodb_query = session["signal_mongodb_query"]
+        # signal_mongodb_query = session["signal_mongodb_query"]
+        signal_mongodb_query = json.loads(user.filters["signal_back"])
+
 
         has_linkedin_query = {"$and":[{"Linkedin Profile Attached": {"$ne": None}}, {"Linkedin Profile Attached": {"$ne": ""}}]}
 
@@ -511,6 +546,8 @@ def handle_linkedin_investors():
         print("Slow Part 2 --- %s seconds ---" % (time.time() - start_time_2))
         total_count = session["signal_query_count"]
     
+        user.update(set__filters__linkedin_back=json.dumps(query))
+
         next_chunk = offset + limit
         prev_chunk = 0
         if offset - limit > 0:
@@ -705,5 +742,8 @@ def alter_user(id):
 
 
 if __name__ == '__main__':
+  if ENVIRONMENT == "DEV":
+    app.run(debug=True)
+  else:
     app.run(host='0.0.0.0', port=1337)
  

@@ -25,9 +25,10 @@
         </ol>
     </nav>
     <div class="row mb-2">
-        <button class="col col-md-3 m-2 btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#filtersOffcanvas" aria-controls="filtersOffcanvas">Open Filters</button>
-        <button class="col col-md-3 m-2 btn btn-success" onclick="get_inv()">Apply your filter</button>
-        <button class="col col-md-3 m-2 btn btn-danger" onclick="clear_filters()">Clear Filters</button>
+        <button class="col col-md-2 m-2 btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#filtersOffcanvas" aria-controls="filtersOffcanvas">Open Filters</button>
+        <button class="col col-md-2 m-2 btn btn-success" onclick="get_inv()">Apply your filter</button>
+        <button class="col col-md-2 m-2 btn btn-danger" onclick="clear_filters()">Clear Filters</button>
+        {% block filter_ctrl_btns %}{% endblock %}
     </div>
     <h2>
         Showing <span id="query_count"></span> of <span id="total_count"></span> (<span id="count_percent"></span>%)

@@ -41,3 +41,13 @@ function debounce(func, timeout = 300){
     timer = setTimeout(() => { func.apply(this, args); }, timeout);
   };
 }
+
+
+// Auto Dismess Alerts after 4 Seconds
+const autoDismessAlert = () => {
+  setTimeout(function() {
+    $(".alert").alert('close');
+  }, 7000);
+};
+
+$(document).ready(autoDismessAlert());
