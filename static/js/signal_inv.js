@@ -255,7 +255,7 @@ searchInputs.forEach(searchInput => {
 });
 
 // Handle Search Profile Name
-const handleSearchProflieName = debounce(async () => {
+const handleSearchProfileName = debounce(async () => {
     let searchProfileName = document.getElementById("searchProfileName");
     let searchValue = searchProfileName.value.trim();
     signal_query.profile_name = searchValue
@@ -423,3 +423,9 @@ const clear_filters = async () => {
 // Call Get signal_inv data function
 get_inv();
 get_filters_options();
+
+// Fire Apply Filter after Offcanvas closing
+var filtersOffcanvas = document.getElementById('filtersOffcanvas');
+filtersOffcanvas.addEventListener('hidden.bs.offcanvas', function () {
+    get_inv();
+})

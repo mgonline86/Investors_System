@@ -17,89 +17,155 @@
         <form class="row gy-2 gx-3 align-items-center">
             <h3>All filters are still in progress (not accurate)</h3>
             
-            <div class="col-auto">
-                <h6>Sweet Spot</h6>
-                <div class="row">
-                    <div class="col">
-                        <label for="min-sweet-spot" class="form-label">Min</label>
-                        <input type="number" class="form-control" min="0" max="99999999" step="1" id="min-sweet-spot" onchange="handleMinSweet()" >
-                    </div>
-                    <div class="col">
-                        <label for="max-sweet-spot" class="form-label">Max</label>
-                        <input type="number" class="form-control" min="0" max="99999999" step="1" id="max-sweet-spot" onchange="handleMaxSweet()" >
-                    </div>
-                </div>
-            </div>
-            <hr>
-            
-            <div class="col-12" >
-                <label for="position-select" class="col-12 form-label h6">Position</label>
-                <div id="position-select"></div>
-            </div>
-            <hr>
-
-                
-            <div class="col-12" >
-                <label for="new-stage-select" class="col-12 form-label h6">Stage</label>
-                <p>Match any of the selected options</p>
-                <div id="new-stage-select"></div>
-            </div>
-            <hr>
-
-            
-            <div class="col-12">
-                <label for="stage-select" class="col-12 form-label h6">Is on these SECTOR & STAGE RANKINGS</label>
-                <p>Match any of the selected options</p>
-                
-                <div id="stage-select"></div>
-            </div>
-            <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" role="switch" id="stage-all-check" onchange="handleStageMatchAll()">
-                <label class="form-check-label" for="stage-all-check">Match All selected options</label>
-            </div>
-            <hr>
-            <div class="mb-3">
-                <label for="searchProfileName" class="form-label">Profile Name</label>
-                <input type="text" class="form-control searchInput" id="searchProfileName" placeholder="Search..." autocomplete="off" oninput="handleSearchProflieName()">
-                <p class="mx-1 p-2 d-none searchSugg">0 Matches</p>
-            </div>
-            <hr>
-            <div class="col-auto">
-                <h6>Investor connections amount (still under developement not functional)</h6>
-                <div class="row">
-                    <div class="col">
-                        <label for="min-invs-connect" class="form-label">Min</label>
-                        <input type="number" class="form-control" min="0" max="99999" step="1" id="min-invs-connect" onchange="handleMinInvCon()" >
-                    </div>
-                    <div class="col">
-                        <label for="max-invs-connect" class="form-label">Max</label>
-                        <input type="number" class="form-control" min="0" max="99999" step="1" id="max-invs-connect" onchange="handleMaxInvCon()" >
-                    </div>
-                </div>
-            </div>
-            <hr>
-            <div class="col-auto">
-                <h6>Investment Amount</h6>
-                <div class="row">
-                    <div class="col">
-                        <label for="min-investment" class="form-label">Min</label>
-                        <div class="input-group has-validation">
-                            <input type="number" class="form-control" min="0" max="1000000000" step="1000" id="min-investment" onchange="handleMinInvest()">
-                            <div class="invalid-feedback">
-                                Please Add a Value Here!
+            <div class="accordion" id="filterAccordion">
+                <!-- Sweet Spot Filter (Start) -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="sweetSpot">
+                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sweetSpotCollapse" aria-expanded="true" aria-controls="sweetSpotCollapse">
+                        Sweet Spot
+                      </button>
+                    </h2>
+                    <div id="sweetSpotCollapse" class="accordion-collapse collapse show" aria-labelledby="sweetSpot">
+                      <div class="accordion-body">
+                        <div class="row">
+                            <div class="col">
+                                <label for="min-sweet-spot" class="form-label">Min</label>
+                                <input type="number" class="form-control" min="0" max="99999999" step="1" id="min-sweet-spot" onchange="handleMinSweet()" >
+                            </div>
+                            <div class="col">
+                                <label for="max-sweet-spot" class="form-label">Max</label>
+                                <input type="number" class="form-control" min="0" max="99999999" step="1" id="max-sweet-spot" onchange="handleMaxSweet()" >
                             </div>
                         </div>
-                    </div>
-                    <div class="col">
-                        <label for="max-investment" class="form-label">Max</label>
-                        <div class="input-group has-validation">
-                            <input type="number" class="form-control" min="0" max="1000000000" step="1000" id="max-investment" onchange="handleMaxInvest()">
-                            <div class="invalid-feedback">
-                                Please Add a Value Here!
-                            </div>
-                        </div>
+                      </div>
                     </div>
                 </div>
+                <!-- Sweet Spot Filter (End) -->
+
+                <!-- Position Filter (Start) -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="position">
+                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#positionCollapse" aria-expanded="true" aria-controls="positionCollapse">
+                        Position
+                      </button>
+                    </h2>
+                    <div id="positionCollapse" class="accordion-collapse collapse show" aria-labelledby="position">
+                      <div class="accordion-body">
+                        <div id="position-select"></div>
+                      </div>
+                    </div>
+                </div>            
+                <!-- Position Filter (End) -->
+
+                <!-- New Stage Filter (Start) -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="stage">
+                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#stageCollapse" aria-expanded="true" aria-controls="stageCollapse">
+                        Stage
+                      </button>
+                    </h2>
+                    <div id="stageCollapse" class="accordion-collapse collapse show" aria-labelledby="stage">
+                      <div class="accordion-body">
+                        <p>Match any of the selected options</p>
+                        <div id="new-stage-select"></div>
+                      </div>
+                    </div>
+                </div> 
+                <!-- New Stage Filter (End) -->
+                
+                <!-- Old Stage Filter (Start) -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="oldStage">
+                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#oldStageCollapse" aria-expanded="true" aria-controls="oldStageCollapse">
+                        Is on these SECTOR & STAGE RANKINGS
+                      </button>
+                    </h2>
+                    <div id="oldStageCollapse" class="accordion-collapse collapse show" aria-labelledby="oldStage">
+                      <div class="accordion-body">
+                        <p>Match any of the selected options</p>
+                        <div id="stage-select"></div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="stage-all-check" onchange="handleStageMatchAll()">
+                            <label class="form-check-label" for="stage-all-check">Match All selected options</label>
+                        </div>
+                      </div>
+                    </div>
+                </div> 
+                <!-- Old Stage Filter (End) -->
+                
+                <!-- Profile Name Filter (Start) -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="profileName">
+                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#profileNameCollapse" aria-expanded="true" aria-controls="profileNameCollapse">
+                        Profile Name
+                      </button>
+                    </h2>
+                    <div id="profileNameCollapse" class="accordion-collapse collapse show" aria-labelledby="oldStage">
+                      <div class="accordion-body">
+                        <input type="text" class="form-control searchInput" id="searchProfileName" placeholder="Search..." autocomplete="off" oninput="handleSearchProfileName()">
+                        <p class="mx-1 p-2 d-none searchSugg">0 Matches</p>
+                      </div>
+                    </div>
+                </div> 
+                <!-- Profile Name Filter (End) -->
+                
+                <!-- Connections Amount Filter (Start) -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="connectionAmount">
+                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#connectionAmountCollapse" aria-expanded="true" aria-controls="connectionAmountCollapse">
+                        Investor connections amount (still under developement not functional)
+                      </button>
+                    </h2>
+                    <div id="connectionAmountCollapse" class="accordion-collapse collapse show" aria-labelledby="oldStage">
+                      <div class="accordion-body">
+                        <div class="row">
+                            <div class="col">
+                                <label for="min-invs-connect" class="form-label">Min</label>
+                                <input type="number" class="form-control" min="0" max="99999" step="1" id="min-invs-connect" onchange="handleMinInvCon()" >
+                            </div>
+                            <div class="col">
+                                <label for="max-invs-connect" class="form-label">Max</label>
+                                <input type="number" class="form-control" min="0" max="99999" step="1" id="max-invs-connect" onchange="handleMaxInvCon()" >
+                            </div>
+                        </div>
+                      </div>
+                    </div>
+                </div> 
+                <!-- Connections Amount Filter (End) -->
+                
+                <!-- Investment Amount Filter (Start) -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="investmentAmount">
+                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#investmentAmountCollapse" aria-expanded="true" aria-controls="investmentAmountCollapse">
+                        Investment Amount
+                      </button>
+                    </h2>
+                    <div id="investmentAmountCollapse" class="accordion-collapse collapse show" aria-labelledby="oldStage">
+                      <div class="accordion-body">
+                        <div class="row">
+                            <div class="col">
+                                <label for="min-investment" class="form-label">Min</label>
+                                <div class="input-group has-validation">
+                                    <input type="number" class="form-control" min="0" max="1000000000" step="1000" id="min-investment" onchange="handleMinInvest()">
+                                    <div class="invalid-feedback">
+                                        Please Add a Value Here!
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <label for="max-investment" class="form-label">Max</label>
+                                <div class="input-group has-validation">
+                                    <input type="number" class="form-control" min="0" max="1000000000" step="1000" id="max-investment" onchange="handleMaxInvest()">
+                                    <div class="invalid-feedback">
+                                        Please Add a Value Here!
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+                <!-- Investment Amount Filter (End) -->
             </div>
         </form>
 {% endblock %}
