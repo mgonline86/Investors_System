@@ -2,6 +2,7 @@
 var prev_chunk = 0;
 var next_chunk = 0;
 var getFinalResult = false;
+var showFinalSwitch = document.getElementById("show-final-check");
 
 
 // Define Filter Input Fields
@@ -51,6 +52,9 @@ async function get_inv(page_chunk = null, finalResults=false) {
     if (getFinalResult) {
         var finalResultTag = "finalResults=" + String(getFinalResult);
         queryParams.push(finalResultTag)
+    }
+    else{
+        showFinalSwitch.checked = false
     }
 
     if (queryParams.length > 0) {
@@ -429,3 +433,12 @@ var filtersOffcanvas = document.getElementById('filtersOffcanvas');
 filtersOffcanvas.addEventListener('hidden.bs.offcanvas', function () {
     get_inv();
 })
+
+// Handle Show Final Results
+const handleShowFinal = async (e) => {
+    if (e.target.checked) {
+        get_inv(undefined, true);
+    } else {
+        get_inv(undefined, false);
+    }
+}

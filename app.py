@@ -254,8 +254,6 @@ def handle_signal_investors():
         query_count = signal_invest_data.count_documents(query)
         
         total_count = signal_invest_data.count_documents({})
-
-        add_to_session("signal_query_count", query_count)
         
         add_to_session("signal_total_count", total_count)
 
@@ -401,8 +399,10 @@ def handle_linkedin_investors():
           query = {**has_linkedin_query}
 
         has_linkedin_count = len(person_ids_list)
+
+        signal_query_count = signal_invest_data.count_documents(signal_mongodb_query)        
         
-        no_linkedin_count = session["signal_query_count"] - has_linkedin_count
+        no_linkedin_count = signal_query_count - has_linkedin_count
 
         min_sweet_spot = body.get("min_sweet_spot")
         max_sweet_spot = body.get("max_sweet_spot")
@@ -544,7 +544,7 @@ def handle_linkedin_investors():
 
 
         print("Slow Part 2 --- %s seconds ---" % (time.time() - start_time_2))
-        total_count = session["signal_query_count"]
+        total_count = signal_query_count
     
         user.update(set__filters__linkedin_back=json.dumps(query))
 

@@ -24,9 +24,9 @@
             <li class="breadcrumb-item {% block bCrumbLinkedInActive %}{% endblock %}" {% block bCrumbLinkedInCurrent %}{% endblock %}>{% block bCrumbLinkedInAnchor %}{% endblock %}</li>
         </ol>
     </nav>
-    <div class="row mb-2">
+    <div class="row mb-2 align-items-center">
         <button class="col col-md-2 m-2 btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#filtersOffcanvas" aria-controls="filtersOffcanvas">Open Filters</button>
-        <button class="col col-md-2 m-2 btn btn-success" onclick="get_inv()">Apply your filter</button>
+        {# <button class="col col-md-2 m-2 btn btn-success" onclick="get_inv()">Apply your filter</button> #}
         <button class="col col-md-2 m-2 btn btn-danger" onclick="clear_filters()">Clear Filters</button>
         {% block filter_ctrl_btns %}{% endblock %}
     </div>

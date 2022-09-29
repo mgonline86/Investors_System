@@ -84,3 +84,8 @@ a.nostyle:visited {
     bottom: 5vh;
     right: 5vw;
 }
+
+/* Cursor Pointer */
+.cursor-pointer{
+    cursor: pointer;
+}
