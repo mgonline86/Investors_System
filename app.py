@@ -242,8 +242,8 @@ def handle_signal_investors():
         # if profile_name and profile_name != "":
         #     query["Profile Name"] = { "$regex": profile_name, "$options" :'i' }
             
-        if new_profile_name and new_profile_name != "":
-            query["Profile Name"] = new_profile_name
+        if new_profile_name and len(new_profile_name) > 0:
+            query["Profile Name"] = { "$in": new_profile_name }
             
         if firm and len(firm) > 0:
             #match any

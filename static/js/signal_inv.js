@@ -428,25 +428,27 @@ const get_filters_options = async () => {
             });
 
             // Get New Name Select Options
-            if (signal_query.new_profile_name !== "") {
-                var newNameOptions = [signal_query.new_profile_name];
-            }
-            else{
+            // if (signal_query.new_profile_name.length !== 0) {
+            //     var newNameOptions = signal_query.new_profile_name;
+            // }
+            // else{
                 var newNameOptions = data.options.new_profile_name_options || [];
-            }
+            // }
             
             VirtualSelect.init({
                 ele: '#new-profile-name-select',
                 options: newNameOptions,
                 search: true,
                 // Enable the multi select support
-                multiple: false,
+                multiple: true,
                 // Customize the placeholder text
                 placeholder: 'Search',
                 // Text to show when no options to show
                 noOptionsText: 'No results found',
                 // Use this method to set options while loading options from server.
                 onServerSearch: searchDataOnServer,
+                // Show as Tags
+                showValueAsTags: true,
             });
 
             document.querySelector('#new-profile-name-select').addEventListener('change', function() {
@@ -454,12 +456,12 @@ const get_filters_options = async () => {
             });
 
             // Get Firm Select Options
-            if (signal_query.firm.length !== 0) {
-                var firmOptions = signal_query.firm;
-            }
-            else{
+            // if (signal_query.firm.length !== 0) {
+            //     var firmOptions = signal_query.firm;
+            // }
+            // else{
                 var firmOptions = data.options.firm_options || [];
-            }
+            // }
             
             VirtualSelect.init({
                 ele: '#firm-select',
