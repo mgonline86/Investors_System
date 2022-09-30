@@ -364,7 +364,7 @@ def search_signal_investors():
     field = body.get("field")
     query = body.get("query")
     limit = body.get("limit")
-    result = SIGNAL_INVEST_DATA.distinct(field, { field: { "$regex": f'^{query}', "$options" :'i' } })[:limit]
+    result = SIGNAL_INVEST_DATA.distinct(field, { field: { "$regex": f'^{query}', "$options" :'i' } })#[:limit]
     result = [x for x in result if type(x) == str]
     return jsonify({
       "result" : result,
@@ -384,14 +384,9 @@ def signal_filter_options():
       stage_options = [x for x in stage_options if type(x) == str]
       position_options = list(SIGNAL_INVEST_DATA.distinct("Position"))
       position_options = [x for x in position_options if type(x) == str]
-      new_profile_name_options = SIGNAL_INVEST_DATA.find(
-        {"Profile Name": {"$ne": None}},
-        {"_id":0, "Profile Name":1},
-        limit=20,
-        sort=[('Profile Name', pymongo.ASCENDING)]
-      )
-      new_profile_name_options = [x["Profile Name"] for x in new_profile_name_options if type(x["Profile Name"]) == str]
-      firm_options = SIGNAL_INVEST_DATA.distinct("Firm")[:20]
+      new_profile_name_options = SIGNAL_INVEST_DATA.distinct("Firm")#[:20]
+      new_profile_name_options = [x for x in new_profile_name_options if type(x) == str]
+      firm_options = SIGNAL_INVEST_DATA.distinct("Firm")#[:20]
       firm_options = [x for x in firm_options if type(x) == str]
     except:
       stage_options = [] 
