@@ -549,7 +549,6 @@ const getSearchData = async (searchValue, virtualSelect) => {
     .then(data => {
         try {
             // Adding Current Selected Values to server Options to prevent hidding selected values
-            console.log(data.result.length)
             let serverOptions = [...data.result, ...signal_query[query_field]].filter(onlyUnique)
             virtualSelect.setServerOptions(serverOptions);
         }
