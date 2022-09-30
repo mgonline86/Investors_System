@@ -454,8 +454,8 @@ const get_filters_options = async () => {
             });
 
             // Get Firm Select Options
-            if (signal_query.firm !== "") {
-                var firmOptions = [signal_query.firm];
+            if (signal_query.firm.length !== 0) {
+                var firmOptions = signal_query.firm;
             }
             else{
                 var firmOptions = data.options.firm_options || [];
@@ -466,13 +466,15 @@ const get_filters_options = async () => {
                 options: firmOptions,
                 search: true,
                 // Enable the multi select support
-                multiple: false,
+                multiple: true,
                 // Customize the placeholder text
                 placeholder: 'Search',
                 // Text to show when no options to show
                 noOptionsText: 'No results found',
                 // Use this method to set options while loading options from server.
                 onServerSearch: searchDataOnServer,
+                // Show as Tags
+                showValueAsTags: true,
             });
 
             document.querySelector('#firm-select').addEventListener('change', function() {
@@ -516,13 +518,16 @@ const getSearchData = async (searchValue, virtualSelect) => {
     let url = "/api/investors/signal/search";
     let eleId = virtualSelect.$ele.id;
     let field = "";
+    let query_field = "";
     switch (eleId) {
         case "new-profile-name-select":
             field = "Profile Name";
+            query_field = "new_profile_name";
             break;
-    
-        case "firm-select":
-            field = "Firm";
+            
+            case "firm-select":
+                field = "Firm";
+                query_field = "firm";
             break;
     
         default:
@@ -543,7 +548,9 @@ const getSearchData = async (searchValue, virtualSelect) => {
     .then(response => response.json())
     .then(data => {
         try {
-            virtualSelect.setServerOptions(data.result);
+            // Adding Current Selected Values to server Options to prevent hidding selected values
+            let serverOptions = [...data.result, ...signal_query[query_field]].filter(onlyUnique)
+            virtualSelect.setServerOptions(serverOptions);
         }
         catch(err){
             console.log(err)

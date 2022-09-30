@@ -245,9 +245,9 @@ def handle_signal_investors():
         if new_profile_name and new_profile_name != "":
             query["Profile Name"] = new_profile_name
             
-        if firm and firm != "":
-            query["Firm"] = firm
-            
+        if firm and len(firm) > 0:
+            #match any
+            query["Firm"] = { "$in": firm }
         
         #investment range filter
         min_investment = body.get("min_investment")

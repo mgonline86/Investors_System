@@ -51,3 +51,8 @@ const autoDismessAlert = () => {
 };
 
 $(document).ready(autoDismessAlert());
+
+// Function Used with .filter() to get unique Array
+function onlyUnique(value, index, self) {
+  return self.indexOf(value) === index;
+}
