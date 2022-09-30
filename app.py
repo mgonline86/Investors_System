@@ -1,4 +1,3 @@
-from email.policy import default
 import os
 import requests
 from dotenv import load_dotenv
@@ -20,9 +19,22 @@ import json
 
 import time
 
+### DECLARING GLOBAL VARIABLES ###
+
 ENVIRONMENT = os.getenv('ENVIRONMENT')
 
+## DATABASES ##
 
+#Hamed is data only
+#SIGNAL_INVEST_DATA = db.signalNFXInvestors
+
+#merged data from hesham and hamed
+SIGNAL_INVEST_DATA = db.signalMerge
+
+#LinkedIn Data 
+LINKEDIN_INVEST_DATA = db.signalMerge 
+
+### APP SETUP ###
 app = Flask(__name__)
 # app.secret_key = SECRET_KEY
 
@@ -116,12 +128,6 @@ def linkedin_investors():
 @login_required
 def handle_signal_investors():
     try:
-        #Hamed is data only
-        #signal_invest_data = db.signalNFXInvestors
-        
-        #merged data from hesham and hamed 
-        signal_invest_data = db.signalMerge
-        
         query = {}
 
         body = request.get_json()
@@ -140,7 +146,11 @@ def handle_signal_investors():
         
         stage = body.get("stage")
 
-        profile_name = body.get("profile_name")
+        # profile_name = body.get("profile_name")
+
+        new_profile_name = body.get("new_profile_name")
+
+        firm = body.get("firm")
 
         try:
             stage_match_all = body.get("stage_match_all")
@@ -229,8 +239,14 @@ def handle_signal_investors():
         if max_invs_connect and max_invs_connect != "":
             query["Investing connections amount"]['$lte'] = int(max_invs_connect)
             
-        if profile_name and profile_name != "":
-            query["Profile Name"] = { "$regex": profile_name, "$options" :'i' }
+        # if profile_name and profile_name != "":
+        #     query["Profile Name"] = { "$regex": profile_name, "$options" :'i' }
+            
+        if new_profile_name and new_profile_name != "":
+            query["Profile Name"] = new_profile_name
+            
+        if firm and firm != "":
+            query["Firm"] = firm
             
         
         #investment range filter
@@ -251,9 +267,9 @@ def handle_signal_investors():
 
         
         # Counting Query Documents Vs. Total Documents
-        query_count = signal_invest_data.count_documents(query)
+        query_count = SIGNAL_INVEST_DATA.count_documents(query)
         
-        total_count = signal_invest_data.count_documents({})
+        total_count = SIGNAL_INVEST_DATA.count_documents({})
         
         add_to_session("signal_total_count", total_count)
 
@@ -274,14 +290,14 @@ def handle_signal_investors():
           final_query = json.loads(user.filters.get("linkedin_back"))
           final_person_ids = final_database.distinct("person_id", final_query)
           query["person_id"] = { "$in": final_person_ids }
-          query_count = signal_invest_data.count_documents(query)
+          query_count = SIGNAL_INVEST_DATA.count_documents(query)
 
         
         #Logic for pagination
         offset = int(request.args.get('offset',0))
         limit = 10
         
-        starting_id = signal_invest_data.find(query).sort('_id', pymongo.ASCENDING)
+        starting_id = SIGNAL_INVEST_DATA.find(query).sort('_id', pymongo.ASCENDING)
 
         try:
           last_id = starting_id[offset]['_id']
@@ -296,7 +312,7 @@ def handle_signal_investors():
             prev_chunk = offset - limit
 
         if last_id:
-          json_data = signal_invest_data.find({**query, **{"_id": {'$gte': last_id}}}, limit=limit).sort('_id', pymongo.ASCENDING)
+          json_data = SIGNAL_INVEST_DATA.find({**query, **{"_id": {'$gte': last_id}}}, limit=limit).sort('_id', pymongo.ASCENDING)
         else:
           json_data = []        
 
@@ -326,11 +342,10 @@ def handle_signal_investors():
 @login_required
 def count_signal_investors():
   try:
-    signal_invest_data = db.signalMerge
     body = request.get_json()
     field = body.get("field")
     query = body.get("query")
-    count = signal_invest_data.count_documents({ field: { "$regex": query, "$options" :'i' } })
+    count = SIGNAL_INVEST_DATA.count_documents({ field: { "$regex": query, "$options" :'i' } })
     return jsonify({
       "count" : count,
     })
@@ -339,24 +354,56 @@ def count_signal_investors():
       "count" : 0,
     })
 
+
+# Search Field Options Route
+@app.route('/api/investors/signal/search', methods=["POST"])
+@login_required
+def search_signal_investors():
+  try:
+    body = request.get_json()
+    field = body.get("field")
+    query = body.get("query")
+    limit = body.get("limit")
+    result = SIGNAL_INVEST_DATA.distinct(field, { field: { "$regex": f'^{query}', "$options" :'i' } })[:limit]
+    result = [x for x in result if type(x) == str]
+    return jsonify({
+      "result" : result,
+    })
+  except:
+    return jsonify({
+      "result" : [],
+    })
+
 # Get Filters Options
 @app.route('/api/investors/signal/options')
 @login_required
 def signal_filter_options():
   try:
-    signal_invest_data = db.signalMerge
     try:
-      stage_options = list(signal_invest_data.distinct("Sector & Stage Rankings"))
+      stage_options = list(SIGNAL_INVEST_DATA.distinct("Sector & Stage Rankings"))
       stage_options = [x for x in stage_options if type(x) == str]
-      position_options = list(signal_invest_data.distinct("Position"))
+      position_options = list(SIGNAL_INVEST_DATA.distinct("Position"))
       position_options = [x for x in position_options if type(x) == str]
+      new_profile_name_options = SIGNAL_INVEST_DATA.find(
+        {"Profile Name": {"$ne": None}},
+        {"_id":0, "Profile Name":1},
+        limit=20,
+        sort=[('Profile Name', pymongo.ASCENDING)]
+      )
+      new_profile_name_options = [x["Profile Name"] for x in new_profile_name_options if type(x["Profile Name"]) == str]
+      firm_options = SIGNAL_INVEST_DATA.distinct("Firm")[:20]
+      firm_options = [x for x in firm_options if type(x) == str]
     except:
       stage_options = [] 
       position_options = []
+      new_profile_name_options = []
+      firm_options = []
     return jsonify({
       "options" : {
         "stage_options" : stage_options,
         "position_options" : position_options,
+        "new_profile_name_options" : new_profile_name_options,
+        "firm_options" : firm_options,
       }
     })
   except:
@@ -373,17 +420,12 @@ def handle_linkedin_investors():
         user = User.objects(id=current_user.id).first()
 
         query = {}
-        body = request.get_json()
-
-        #LinkedIn Data 
-        linkedin_invest_data = db.signalMerge        
+        body = request.get_json() 
         
         # Save Query to Session
         # add_to_session("linkedin_query", body)
         user.update(set__filters__linkedin_front=body)
         
-
-        signal_invest_data = db.signalMerge
 
         # signal_mongodb_query = session["signal_mongodb_query"]
         signal_mongodb_query = json.loads(user.filters["signal_back"])
@@ -391,7 +433,7 @@ def handle_linkedin_investors():
 
         has_linkedin_query = {"$and":[{"Linkedin Profile Attached": {"$ne": None}}, {"Linkedin Profile Attached": {"$ne": ""}}]}
 
-        person_ids_list = signal_invest_data.distinct("person_id", {**signal_mongodb_query, **has_linkedin_query})
+        person_ids_list = SIGNAL_INVEST_DATA.distinct("person_id", {**signal_mongodb_query, **has_linkedin_query})
 
         if signal_mongodb_query != {}:
           query["person_id"] = { "$in": person_ids_list }
@@ -400,7 +442,7 @@ def handle_linkedin_investors():
 
         has_linkedin_count = len(person_ids_list)
 
-        signal_query_count = signal_invest_data.count_documents(signal_mongodb_query)        
+        signal_query_count = SIGNAL_INVEST_DATA.count_documents(signal_mongodb_query)        
         
         no_linkedin_count = signal_query_count - has_linkedin_count
 
@@ -529,7 +571,7 @@ def handle_linkedin_investors():
 
         start_time = time.time()
 
-        starting_id = linkedin_invest_data.find(query).sort('_id', pymongo.ASCENDING)
+        starting_id = LINKEDIN_INVEST_DATA.find(query).sort('_id', pymongo.ASCENDING)
 
         try:
           last_id = starting_id[offset]['_id']
@@ -540,7 +582,7 @@ def handle_linkedin_investors():
         start_time_2 = time.time()    
         
         # Counting Query Documents Vs. Total Documents
-        query_count = linkedin_invest_data.count_documents(query)
+        query_count = LINKEDIN_INVEST_DATA.count_documents(query)
 
 
         print("Slow Part 2 --- %s seconds ---" % (time.time() - start_time_2))
@@ -555,7 +597,7 @@ def handle_linkedin_investors():
 
 
         if last_id:
-          json_data = linkedin_invest_data.find({**query, **{"_id": {'$gte': last_id}}}, limit=limit).sort('_id', pymongo.ASCENDING)
+          json_data = LINKEDIN_INVEST_DATA.find({**query, **{"_id": {'$gte': last_id}}}, limit=limit).sort('_id', pymongo.ASCENDING)
         else:
           json_data = []        
             
@@ -589,11 +631,10 @@ def handle_linkedin_investors():
 @login_required
 def count_linkedin_investors():
   try:
-    linkedin_invest_data = db.signalMerge
     body = request.get_json()
     field = body.get("field")
     query = body.get("query")
-    count = linkedin_invest_data.count_documents({ field: { "$regex": query, "$options" :'i' } })
+    count = LINKEDIN_INVEST_DATA.count_documents({ field: { "$regex": query, "$options" :'i' } })
     return jsonify({
       "count" : count,
     })
@@ -607,11 +648,10 @@ def count_linkedin_investors():
 @login_required
 def linkedin_filter_options():
   try:
-    linkedin_invest_data = db.signalMerge
     try:
-      stage_options = list(linkedin_invest_data.distinct("Sector & Stage Rankings"))
+      stage_options = list(LINKEDIN_INVEST_DATA.distinct("Sector & Stage Rankings"))
       stage_options = [x for x in stage_options if type(x) == str]
-      position_options = list(linkedin_invest_data.distinct("Position"))
+      position_options = list(LINKEDIN_INVEST_DATA.distinct("Position"))
       position_options = [x for x in position_options if type(x) == str]
     except:
       stage_options = [] 

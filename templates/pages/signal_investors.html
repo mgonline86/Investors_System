@@ -26,6 +26,21 @@
     
     <div class="accordion" id="filterAccordion">
 
+      <!-- Firm Filter (Start) -->
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="firm">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#firmCollapse" aria-expanded="true" aria-controls="firmCollapse">
+            Firm
+          </button>
+        </h2>
+        <div id="firmCollapse" class="accordion-collapse collapse show" aria-labelledby="oldStage">
+          <div class="accordion-body">
+            <div id="firm-select"></div>
+          </div>
+        </div>
+      </div> 
+      <!-- Firm Filter (End) -->
+      
       <!-- New Stage Filter (Start) -->
       <div class="accordion-item">
         <h2 class="accordion-header" id="stage">
@@ -134,7 +149,7 @@
           </div>
       </div>
       <!-- Sweet Spot Filter (End) -->
-
+{#
       <!-- Profile Name Filter (Start) -->
       <div class="accordion-item">
           <h2 class="accordion-header" id="profileName">
@@ -150,6 +165,21 @@
           </div>
       </div> 
       <!-- Profile Name Filter (End) -->
+#}    
+      <!-- New Profile Name Filter (Start) -->
+      <div class="accordion-item">
+          <h2 class="accordion-header" id="newprofileName">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#newprofileNameCollapse" aria-expanded="true" aria-controls="newprofileNameCollapse">
+              New Profile Name
+            </button>
+          </h2>
+          <div id="newprofileNameCollapse" class="accordion-collapse collapse show" aria-labelledby="oldStage">
+            <div class="accordion-body">
+              <div id="new-profile-name-select"></div>
+            </div>
+          </div>
+      </div> 
+      <!-- New Profile Name Filter (End) -->
       
       <!-- Connections Amount Filter (Start) -->
       <div class="accordion-item">
@@ -179,7 +209,6 @@
   </form>
 {% endblock %}
 
-
 {% block filtersResultsRow %}
     <ul class="list-group-flush" id="inv_list"></ul>
 {% endblock %}
@@ -195,11 +224,13 @@
             newstage: [],
             stage: [],
             stage_match_all: false,
-            profile_name: "",
+            {# profile_name: "", #}
             min_invs_connect: "",
             max_invs_connect: "",
             min_investment: "",
             max_investment: "",
+            new_profile_name: "",
+            firm: "",
         };
 
         var signal_query = {{ signal_query | tojson }} || blank_signal_query;

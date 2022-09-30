@@ -3,9 +3,11 @@ var prev_chunk = 0;
 var next_chunk = 0;
 var getFinalResult = false;
 var showFinalSwitch = document.getElementById("show-final-check");
+var lastQuery = "";
 
 
 // Define Filter Input Fields
+var firmInput = document.querySelector("#firm-select");
 var minSweetSpotInput = document.querySelector("#min-sweet-spot");
 var maxSweetSpotInput = document.querySelector("#max-sweet-spot");
 var positionInput = document.querySelector("#position-select");
@@ -13,6 +15,7 @@ var newStageInput = document.querySelector("#new-stage-select");
 var stageInput = document.querySelector("#stage-select");
 var stageAllCheckInput = document.querySelector("#stage-all-check");
 var profileNameInput = document.querySelector("#searchProfileName");
+var newProfileNameInput = document.querySelector("#new-profile-name-select");
 var minInvsConnctInput = document.querySelector("#min-invs-connect");
 var maxInvsConnctInput = document.querySelector("#max-invs-connect");
 var minInvsInput = document.querySelector("#min-investment");
@@ -21,6 +24,13 @@ var maxInvsInput = document.querySelector("#max-investment");
 
 
 async function get_inv(page_chunk = null, finalResults=false) {
+    if (!finalResults) {
+        // If there is no change in the filter Abort
+        if (JSON.stringify(signal_query) === lastQuery) {
+            return;
+        }
+    }
+
     // Toggle Final Results Flag    
     getFinalResult = finalResults
 
@@ -171,6 +181,9 @@ async function get_inv(page_chunk = null, finalResults=false) {
             total_count_ele.textContent = total_count
             count_percent_ele.textContent = ((query_count/total_count)*100).toFixed(3)
 
+            // Record Last Change in Filter
+            lastQuery = JSON.stringify(signal_query);
+
             hide_load_layout();
         } catch (err) {
             console.log(err)
@@ -207,6 +220,8 @@ VirtualSelect.init({
     noOptionsText: 'No results found',
     // Text to show when no results on search
     noSearchResultsTex: 'No results found',
+    // Show as Tags
+    showValueAsTags: true,
 });
 
 document.querySelector('#new-stage-select').addEventListener('change', function() {
@@ -218,7 +233,6 @@ document.querySelector('#new-stage-select').addEventListener('change', function(
 
 const handleStageMatchAll = () => {
     var stageMatchAll = document.getElementById("stage-all-check").checked;
-    console.log(stageMatchAll)
     signal_query.stage_match_all = stageMatchAll;
 }
 
@@ -351,7 +365,9 @@ const updateFilters = async () =>{
         newStageInput.setValue(signal_query.newstage)
         stageInput.setValue(signal_query.stage)
         stageAllCheckInput.checked = signal_query.stage_match_all
-        profileNameInput.value = signal_query.profile_name;
+        // profileNameInput.value = signal_query.profile_name;
+        newProfileNameInput.setValue(signal_query.new_profile_name)
+        firmInput.setValue(signal_query.firm)
         minInvsConnctInput.value = signal_query.min_invs_connect
         maxInvsConnctInput.value = signal_query.max_invs_connect
         minInvsInput.value = signal_query.min_investment
@@ -368,6 +384,7 @@ const get_filters_options = async () => {
     .then(response => response.json())
     .then(data => {
         try {
+            // Get Old Stage Select Options
             var stageOptions = data.options.stage_options.map(opt => {return {label: opt, value: opt,}})
             VirtualSelect.init({
                 ele: '#stage-select',
@@ -381,14 +398,16 @@ const get_filters_options = async () => {
                 noOptionsText: 'No results found',
                 // Text to show when no results on search
                 noSearchResultsTex: 'No results found',
+                // Show as Tags
+                showValueAsTags: true,
             });
-            // Handle old stage filter
             document.querySelector('#stage-select').addEventListener('change', function() {
                 signal_query.stage = this.value;
             });
 
-            //Handle position filter
-            var positionOptions = data.options.position_options.map(opt => {return {label: opt, value: opt,}});
+            
+            // Get Position Select Options
+            var positionOptions = data.options.position_options || [];
 
             VirtualSelect.init({
                 ele: '#position-select',
@@ -408,6 +427,59 @@ const get_filters_options = async () => {
                 signal_query.position = this.value;
             });
 
+            // Get New Name Select Options
+            if (signal_query.new_profile_name !== "") {
+                var newNameOptions = [signal_query.new_profile_name];
+            }
+            else{
+                var newNameOptions = data.options.new_profile_name_options || [];
+            }
+            
+            VirtualSelect.init({
+                ele: '#new-profile-name-select',
+                options: newNameOptions,
+                search: true,
+                // Enable the multi select support
+                multiple: false,
+                // Customize the placeholder text
+                placeholder: 'Search',
+                // Text to show when no options to show
+                noOptionsText: 'No results found',
+                // Use this method to set options while loading options from server.
+                onServerSearch: searchDataOnServer,
+            });
+
+            document.querySelector('#new-profile-name-select').addEventListener('change', function() {
+                signal_query.new_profile_name = this.value;
+            });
+
+            // Get Firm Select Options
+            if (signal_query.firm !== "") {
+                var firmOptions = [signal_query.firm];
+            }
+            else{
+                var firmOptions = data.options.firm_options || [];
+            }
+            
+            VirtualSelect.init({
+                ele: '#firm-select',
+                options: firmOptions,
+                search: true,
+                // Enable the multi select support
+                multiple: false,
+                // Customize the placeholder text
+                placeholder: 'Search',
+                // Text to show when no options to show
+                noOptionsText: 'No results found',
+                // Use this method to set options while loading options from server.
+                onServerSearch: searchDataOnServer,
+            });
+
+            document.querySelector('#firm-select').addEventListener('change', function() {
+                console.log("Firm changed")
+                signal_query.firm = this.value;
+            });
+
 
             // Update Filter Input Fields with Query Values
             updateFilters()
@@ -424,10 +496,6 @@ const clear_filters = async () => {
     get_inv();
 }
 
-// Call Get signal_inv data function
-get_inv();
-get_filters_options();
-
 // Fire Apply Filter after Offcanvas closing
 var filtersOffcanvas = document.getElementById('filtersOffcanvas');
 filtersOffcanvas.addEventListener('hidden.bs.offcanvas', function () {
@@ -439,6 +507,57 @@ const handleShowFinal = async (e) => {
     if (e.target.checked) {
         get_inv(undefined, true);
     } else {
+        lastQuery = "";
         get_inv(undefined, false);
     }
 }
+
+const getSearchData = async (searchValue, virtualSelect) => {
+    let url = "/api/investors/signal/search";
+    let eleId = virtualSelect.$ele.id;
+    let field = "";
+    switch (eleId) {
+        case "new-profile-name-select":
+            field = "Profile Name";
+            break;
+    
+        case "firm-select":
+            field = "Firm";
+            break;
+    
+        default:
+            break;
+    }
+    fetch(url, {
+        method: "POST",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            "field" : field,
+            "query" : searchValue,
+            "limit" : 20,
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        try {
+            virtualSelect.setServerOptions(data.result);
+        }
+        catch(err){
+            console.log(err)
+        }
+    })
+    .catch(err => console.log(err))
+}
+
+const searchDataOnServer = async (searchValue, virtualSelect) => {
+    /** project developer has to define getSearchData function to make API call */
+    getSearchData(searchValue, virtualSelect)
+}
+
+
+// Call Get signal_inv data function
+get_filters_options();
+get_inv();

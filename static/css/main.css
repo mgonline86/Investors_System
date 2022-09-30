@@ -89,3 +89,8 @@ a.nostyle:visited {
 .cursor-pointer{
     cursor: pointer;
 }
+
+/* Fix Bootstrap Acoordion Overlay Search Box */
+.vscomp-dropbox-container {
+    z-index: 3 !important;
+}
