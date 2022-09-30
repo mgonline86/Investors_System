@@ -24,6 +24,10 @@ var maxInvsInput = document.querySelector("#max-investment");
 
 
 async function get_inv(page_chunk = null, finalResults=false) {
+    if (page_chunk) {
+        lastQuery += String(page_chunk);
+    }
+
     if (!finalResults) {
         // If there is no change in the filter Abort
         if (JSON.stringify(signal_query) === lastQuery) {
