@@ -145,7 +145,9 @@ async function get_inv(page_chunk = null) {
             query_count_ele.textContent = query_count
             total_count_ele.textContent = total_count
             count_percent_ele.textContent = ((query_count/total_count)*100).toFixed(3)
-            excluded_count_ele.textContent = "(" + String(no_linkedin_count) + " results were excluded, having no LinkedIn Profile)"
+            if (no_linkedin_count > 0) {
+                excluded_count_ele.textContent = "(" + String(no_linkedin_count) + " results were excluded, having no LinkedIn Profile)"
+            }
 
             hide_load_layout();
         } catch (err) {
