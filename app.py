@@ -384,7 +384,7 @@ def signal_filter_options():
       stage_options = [x for x in stage_options if type(x) == str]
       position_options = list(SIGNAL_INVEST_DATA.distinct("Position"))
       position_options = [x for x in position_options if type(x) == str]
-      new_profile_name_options = SIGNAL_INVEST_DATA.distinct("Firm")#[:20]
+      new_profile_name_options = SIGNAL_INVEST_DATA.distinct("Profile Name")#[:20]
       new_profile_name_options = [x for x in new_profile_name_options if type(x) == str]
       firm_options = SIGNAL_INVEST_DATA.distinct("Firm")#[:20]
       firm_options = [x for x in firm_options if type(x) == str]
