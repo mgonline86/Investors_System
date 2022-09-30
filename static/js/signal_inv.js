@@ -484,7 +484,6 @@ const get_filters_options = async () => {
             });
 
             document.querySelector('#firm-select').addEventListener('change', function() {
-                console.log("Firm changed")
                 signal_query.firm = this.value;
             });
 
