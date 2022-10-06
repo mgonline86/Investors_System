@@ -57,7 +57,7 @@ async function get_inv(page_chunk = null) {
     .then(response => response.json())
     .then(data => {
         try {
-            var {investors, total_count, query_count, next_chunk, prev_chunk, limit, has_linkedin_count, no_linkedin_count} = data
+            var {investors, total_count, query_count, next_chunk, prev_chunk, limit, no_linkedin_count} = data
             if (investors.length > 0) {
               for (let i = 0; i < investors.length; i++) {
                 let current_investor = investors[i]
@@ -66,48 +66,48 @@ async function get_inv(page_chunk = null) {
                 let li = document.createElement('li');
                 li.classList.add("list-group-item");
 
-                // Appending main image to the list element
-                if (current_investor["images"].length !== 0) {
-                    let div = document.createElement('div');
-                    div.style.cssText = 'position:relative';
-                    div.classList.add("invest-img_container")
+                // // Appending main image to the list element
+                // if (current_investor["images"].length !== 0) {
+                //     let div = document.createElement('div');
+                //     div.style.cssText = 'position:relative';
+                //     div.classList.add("invest-img_container")
                     
-                    let img = document.createElement('img');
-                    img.src = current_investor["images"][0];
-                    img.classList.add("img-fluid")
-                    img.classList.add("invest-img")
+                //     let img = document.createElement('img');
+                //     img.src = current_investor["images"][0];
+                //     img.classList.add("img-fluid")
+                //     img.classList.add("invest-img")
                     
-                    let zoomOverlay = document.createElement('img');
-                    zoomOverlay.src = "/static/img/zoom-in.png";
-                    zoomOverlay.classList.add("img-zoom")
-                    zoomOverlay.setAttribute("data-toggle", "modal");
-                    zoomOverlay.setAttribute("data-target", "#viewImageModal");
-                    zoomOverlay.onclick = function() { toggleviewImageModal(this) }
-                    //data-toggle="modal" data-target="#exampleModalCenter"
+                //     let zoomOverlay = document.createElement('img');
+                //     zoomOverlay.src = "/static/img/zoom-in.png";
+                //     zoomOverlay.classList.add("img-zoom")
+                //     zoomOverlay.setAttribute("data-toggle", "modal");
+                //     zoomOverlay.setAttribute("data-target", "#viewImageModal");
+                //     zoomOverlay.onclick = function() { toggleviewImageModal(this) }
+                //     //data-toggle="modal" data-target="#exampleModalCenter"
                     
 
-                    div.appendChild(img)
-                    div.appendChild(zoomOverlay)
+                //     div.appendChild(img)
+                //     div.appendChild(zoomOverlay)
                     
-                    li.appendChild(div)
-                }
+                //     li.appendChild(div)
+                // }
                 
-                // Appending Profile Name to the list element
-                if (current_investor["Profile Name"]) {
-                    let h3 = document.createElement('h3');
-                    h3.textContent = current_investor["Profile Name"];
-                    li.appendChild(h3)
+                // // Appending Profile Name to the list element
+                // if (current_investor["Profile Name"]) {
+                //     let h3 = document.createElement('h3');
+                //     h3.textContent = current_investor["Profile Name"];
+                //     li.appendChild(h3)
                     
-                }
-                // Appending Position to the list element
-                if (current_investor["Position"]) {
-                    let p = document.createElement('p');
-                    p.classList.add("text-muted")
-                    p.textContent = current_investor["Position"];
-                    li.appendChild(p)
-                }
+                // }
+                // // Appending Position to the list element
+                // if (current_investor["Position"]) {
+                //     let p = document.createElement('p');
+                //     p.classList.add("text-muted")
+                //     p.textContent = current_investor["Position"];
+                //     li.appendChild(p)
+                // }
 
-                // Appending RenderJson to the list element
+                // // Appending RenderJson to the list element
                 li.appendChild(
                     renderjson(current_investor)
                 );

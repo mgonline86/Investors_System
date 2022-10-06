@@ -1,0 +1,101 @@
+{% extends '/filter_layout.html' %}
+{% block title %}TWITTER INVESTORS{% endblock %}
+{% block style %}
+    <link rel="stylesheet" href="/static/virtual-select-master/virtual-select.min.css" />
+{% endblock %}
+
+<!-- Breadcrumb Options -->
+<!-- Signal Breadcrumb -->
+{% block bCrumbSignalAnchor %}<a href="/signal_investors">Signal</a>{% endblock %}</li>
+
+<!-- LinkedIn Breadcrumb -->
+{#{% block bCrumbLinkedInAnchor %}<a href="/signal_investors">LinkedIn</a>{% endblock %}</li>#}
+
+<!-- Twitter Breadcrumb -->
+{% block bCrumbTwitterActive %}active{% endblock %}
+{% block bCrumbTwitterCurrent %}aria-current="page"{% endblock %}
+{% block bCrumbTwitterAnchor %}Twitter{% endblock %}
+
+
+{% block filtersCanvasBody %}
+  <form class="row gy-2 gx-3 align-items-center">
+    <h3>All filters are still in progress (not accurate)</h3>
+    
+    <div class="accordion" id="filterAccordion">
+
+      <!-- Followers Filter (Start) -->
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="followers">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#followersCollapse" aria-expanded="true" aria-controls="followersCollapse">
+            Followers
+          </button>
+        </h2>
+        <div id="followersCollapse" class="accordion-collapse collapse show" aria-labelledby="followers">
+          <div class="accordion-body">
+            <div class="row">
+                <div class="col">
+                    <label for="min-followers" class="form-label">Min</label>
+                    <input type="number" class="form-control" min="0" max="99999999" step="1" id="min-followers" onchange="handleMinFollowers()" >
+                </div>
+                <div class="col">
+                    <label for="max-followers" class="form-label">Max</label>
+                    <input type="number" class="form-control" min="0" max="99999999" step="1" id="max-followers" onchange="handleMaxFollowers()" >
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Followers Filter (End) -->
+
+      <!-- Following Filter (Start) -->
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="following">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#followingCollapse" aria-expanded="true" aria-controls="followingCollapse">
+            Following
+          </button>
+        </h2>
+        <div id="followingCollapse" class="accordion-collapse collapse show" aria-labelledby="following">
+          <div class="accordion-body">
+            <div class="row">
+                <div class="col">
+                    <label for="min-following" class="form-label">Min</label>
+                    <input type="number" class="form-control" min="0" max="99999999" step="1" id="min-following" onchange="handleMinFollowing()" >
+                </div>
+                <div class="col">
+                    <label for="max-following" class="form-label">Max</label>
+                    <input type="number" class="form-control" min="0" max="99999999" step="1" id="max-following" onchange="handleMaxFollowing()" >
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Following Filter (End) -->
+
+    </div>
+  </form>
+{% endblock %}
+
+{% block excluded_count %}
+    <small id="excluded_count" class="text-danger"></small>
+{% endblock %}
+
+{% block filtersResultsRow %}
+    <ul class="list-group-flush" id="inv_list"></ul>
+{% endblock %}
+
+{% block js %}
+    <script src="/static/virtual-select-master/virtual-select.min.js"></script>
+    <script>
+        // Get twitter_inv data function
+        var blank_twitter_query = {
+            min_followers: "",
+            max_followers: "",
+            min_following: "",
+            max_following: "",
+        };
+
+        var twitter_query = {{ twitter_query | tojson }} || blank_twitter_query;
+
+    </script>
+    <script src="/static/js/twitter_inv.js"></script>
+{% endblock %}

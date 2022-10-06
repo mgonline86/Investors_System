@@ -29,10 +29,17 @@ ENVIRONMENT = os.getenv('ENVIRONMENT')
 #SIGNAL_INVEST_DATA = db.signalNFXInvestors
 
 #merged data from hesham and hamed
-SIGNAL_INVEST_DATA = db.signalMerge
+# SIGNAL_INVEST_DATA = db.signalMerge
+SIGNAL_INVEST_DATA = db.signalMergeUpdate1
 
 #LinkedIn Data 
-LINKEDIN_INVEST_DATA = db.signalMerge 
+LINKEDIN_INVEST_DATA = db.signalLinkedInSample 
+
+#Twitter Data 
+TWITTER_INVEST_DATA = db.signalTwittersUpdate1 
+
+#Tail Database (Last one in line)
+TAIL_DATABASE = TWITTER_INVEST_DATA
 
 ### APP SETUP ###
 app = Flask(__name__)
@@ -110,7 +117,6 @@ def index():
 def signal_investors():
     user = User.objects(id=current_user.id).first()
     signal_query = user.filters.get("signal_front")
-    # return render_template('pages/signal_investors.html',  signal_query=session.get("signal_query"))
     return render_template('pages/signal_investors.html',  signal_query=signal_query)
 
 @app.route('/linkedin_investors')
@@ -118,12 +124,19 @@ def signal_investors():
 def linkedin_investors():
     user = User.objects(id=current_user.id).first()
     linkedin_query = user.filters.get("linkedin_front")
-    # return render_template('pages/linkedin_investors.html',  linkedin_query=session.get("linkedin_query"))
     return render_template('pages/linkedin_investors.html',  linkedin_query=linkedin_query)
+
+@app.route('/twitter_investors')
+@login_required
+def twitter_investors():
+    user = User.objects(id=current_user.id).first()
+    twitter_query = user.filters.get("twitter_front")
+    return render_template('pages/twitter_investors.html',  twitter_query=twitter_query)
 
 
 ### API ROUTES
-# Signal_Investors Route
+## Signal_Investors Routes
+# Signal Main Route
 @app.route('/api/investors/signal', methods=["POST"])
 @login_required
 def handle_signal_investors():
@@ -152,6 +165,8 @@ def handle_signal_investors():
 
         firm = body.get("firm")
 
+        sector_of_interest = body.get("sector_of_interest")
+
         try:
             stage_match_all = body.get("stage_match_all")
         except:
@@ -160,16 +175,16 @@ def handle_signal_investors():
         min_invs_connect = body.get("min_invs_connect")
         max_invs_connect = body.get("max_invs_connect")
 
-        #sweet spot filter
+        #Sweet spot filter
         if (min_sweet_spot and min_sweet_spot != "") or (max_sweet_spot and max_sweet_spot != ""):
-            query["Sweet Spot"] = {}
-            query["Sweet Spot"]["$exists"] = True
+            query["Sweet spot"] = {}
+            query["Sweet spot"]["$exists"] = True
 
         if min_sweet_spot and min_sweet_spot != "":
-            query["Sweet Spot"]['$gte'] = int(min_sweet_spot)
+            query["Sweet spot"]['$gte'] = int(min_sweet_spot)
 
         if max_sweet_spot and max_sweet_spot != "":
-            query["Sweet Spot"]['$lte'] = int(max_sweet_spot) 
+            query["Sweet spot"]['$lte'] = int(max_sweet_spot) 
         
         #position filter 
         if position and position != "":
@@ -187,23 +202,23 @@ def handle_signal_investors():
                 else :
                   newstageitems = newstageitems + str(newstage[sitem])
                     
-            query["Sector & Stage Rankings"] = { "$regex": str(newstageitems) }
+            query["Sector & stage rankings"] = { "$regex": str(newstageitems) }
             
             #for multiple selection get first selection (first element on list)
-            #query["Sector & Stage Rankings"] = { "$regex": str(newstage[0]) , "$options" : "$" }
+            #query["Sector & stage rankings"] = { "$regex": str(newstage[0]) , "$options" : "$" }
 
             #single selection  (not a list)
-            #query["Sector & Stage Rankings"] = { "$regex": str(newstage) , }
+            #query["Sector & stage rankings"] = { "$regex": str(newstage) , }
             
 
 
         if stage and len(stage) > 0:
             #match any
-            query["Sector & Stage Rankings"] = { "$in": stage }
+            query["Sector & stage rankings"] = { "$in": stage }
             
             #match all
             if stage_match_all:
-              query["Sector & Stage Rankings"] = { "$all": stage }
+              query["Sector & stage rankings"] = { "$all": stage }
 
         #combine stage(newstage) and sectors&stage rankings(stage) filters when exist
         #because the last code is the one that impacts the final query for the same object int his example 'stage
@@ -221,11 +236,11 @@ def handle_signal_investors():
                   newstageitems = newstageitems + str(newstage[sitem])
             
             #oldstage match any
-            query["Sector & Stage Rankings"] = { "$in": stage,"$regex": str(newstageitems) }
+            query["Sector & stage rankings"] = { "$in": stage,"$regex": str(newstageitems) }
             
             #oldstage match all
             if stage_match_all:
-                  query["Sector & Stage Rankings"] = { "$all": stage,"$regex": str(newstageitems) }
+                  query["Sector & stage rankings"] = { "$all": stage,"$regex": str(newstageitems) }
 
             
             
@@ -240,30 +255,34 @@ def handle_signal_investors():
             query["Investing connections amount"]['$lte'] = int(max_invs_connect)
             
         # if profile_name and profile_name != "":
-        #     query["Profile Name"] = { "$regex": profile_name, "$options" :'i' }
+        #     query["Profile name"] = { "$regex": profile_name, "$options" :'i' }
             
         if new_profile_name and len(new_profile_name) > 0:
-            query["Profile Name"] = { "$in": new_profile_name }
+            query["Profile name"] = { "$in": new_profile_name }
             
         if firm and len(firm) > 0:
             #match any
             query["Firm"] = { "$in": firm }
         
+        if sector_of_interest and len(sector_of_interest) > 0:
+            #match any
+            query["Investement sectors & tags"] = { "$in": sector_of_interest }
+
         #investment range filter
         min_investment = body.get("min_investment")
         max_investment = body.get("max_investment")
         
         if min_investment and min_investment != "" and max_investment and max_investment != "":
-            query["min_investment"] = {}
-            query["min_investment"]["$exists"] = True
-            query["max_investment"] = {}
-            query["max_investment"]["$exists"] = True
+            query["Min investment"] = {}
+            query["Min investment"]["$exists"] = True
+            query["Max investment"] = {}
+            query["Max investment"]["$exists"] = True
 
-            query["min_investment"]['$gte'] = int(min_investment)
-            query["max_investment"]['$gte'] = int(min_investment)
+            query["Min investment"]['$gte'] = int(min_investment)
+            query["Max investment"]['$gte'] = int(min_investment)
 
-            query["min_investment"]['$lte'] = int(max_investment) 
-            query["max_investment"]['$lte'] = int(max_investment) 
+            query["Min investment"]['$lte'] = int(max_investment) 
+            query["Max investment"]['$lte'] = int(max_investment) 
 
         
         # Counting Query Documents Vs. Total Documents
@@ -285,11 +304,10 @@ def handle_signal_investors():
         # Get Final Results Logic
         final_Results = str(request.args.get('finalResults',False))
         if final_Results == "true":
-          #Final Database
-          final_database = db.signalMerge
-          final_query = json.loads(user.filters.get("linkedin_back"))
-          final_person_ids = final_database.distinct("person_id", final_query)
-          query["person_id"] = { "$in": final_person_ids }
+          final_query = json.loads(user.filters.get("twitter_back"))
+          final_person_ids = TAIL_DATABASE.distinct("Signal person ID", final_query)
+          final_person_ids = [int(i) for i in final_person_ids]
+          query["Person id"] = { "$in": final_person_ids }
           query_count = SIGNAL_INVEST_DATA.count_documents(query)
 
         
@@ -337,7 +355,7 @@ def handle_signal_investors():
         })
 
 
-# Count_Investors Route
+# Signal Count_Investors Route
 @app.route('/api/investors/signal/count', methods=["POST"])
 @login_required
 def count_signal_investors():
@@ -355,7 +373,7 @@ def count_signal_investors():
     })
 
 
-# Search Field Options Route
+# Signal Search Field Options Route
 @app.route('/api/investors/signal/search', methods=["POST"])
 @login_required
 def search_signal_investors():
@@ -374,31 +392,35 @@ def search_signal_investors():
       "result" : [],
     })
 
-# Get Filters Options
+# Signal Get Filters Options
 @app.route('/api/investors/signal/options')
 @login_required
 def signal_filter_options():
   try:
     try:
-      stage_options = list(SIGNAL_INVEST_DATA.distinct("Sector & Stage Rankings"))
+      stage_options = list(SIGNAL_INVEST_DATA.distinct("Sector & stage rankings"))
       stage_options = [x for x in stage_options if type(x) == str]
       position_options = list(SIGNAL_INVEST_DATA.distinct("Position"))
       position_options = [x for x in position_options if type(x) == str]
-      new_profile_name_options = SIGNAL_INVEST_DATA.distinct("Profile Name")#[:20]
+      new_profile_name_options = SIGNAL_INVEST_DATA.distinct("Profile name")
       new_profile_name_options = [x for x in new_profile_name_options if type(x) == str]
-      firm_options = SIGNAL_INVEST_DATA.distinct("Firm")#[:20]
+      firm_options = SIGNAL_INVEST_DATA.distinct("Firm")
       firm_options = [x for x in firm_options if type(x) == str]
+      sector_of_interest_options = SIGNAL_INVEST_DATA.distinct("Investement sectors & tags")
+      sector_of_interest_options = [x for x in sector_of_interest_options if type(x) == str]
     except:
       stage_options = [] 
       position_options = []
       new_profile_name_options = []
       firm_options = []
+      sector_of_interest_options = []
     return jsonify({
       "options" : {
         "stage_options" : stage_options,
         "position_options" : position_options,
         "new_profile_name_options" : new_profile_name_options,
         "firm_options" : firm_options,
+        "sector_of_interest_options" : sector_of_interest_options,
       }
     })
   except:
@@ -406,7 +428,8 @@ def signal_filter_options():
       "options" : {},
     })
 
-# Signal_Investors Route
+## LinkedIn_Investors Routes
+# LinkedIn Main Route
 @app.route('/api/investors/linkedin', methods=["POST"])
 @login_required
 def handle_linkedin_investors():
@@ -426,140 +449,21 @@ def handle_linkedin_investors():
         signal_mongodb_query = json.loads(user.filters["signal_back"])
 
 
-        has_linkedin_query = {"$and":[{"Linkedin Profile Attached": {"$ne": None}}, {"Linkedin Profile Attached": {"$ne": ""}}]}
+        # has_linkedin_query = {"$and":[{"Linkedin Profile Attached": {"$ne": None}}, {"Linkedin Profile Attached": {"$ne": ""}}]}
+        # has_linkedin_query = {}
 
-        person_ids_list = SIGNAL_INVEST_DATA.distinct("person_id", {**signal_mongodb_query, **has_linkedin_query})
+        # person_ids_list = SIGNAL_INVEST_DATA.distinct("Person id", {**signal_mongodb_query, **has_linkedin_query})
+        person_ids_list = SIGNAL_INVEST_DATA.distinct("Person id", signal_mongodb_query)
 
-        if signal_mongodb_query != {}:
-          query["person_id"] = { "$in": person_ids_list }
-        else:
-          query = {**has_linkedin_query}
+        # if signal_mongodb_query != {}:
+        query["Person id"] = { "$in": person_ids_list }
+        # else:
+        #   query = {**has_linkedin_query}
 
-        has_linkedin_count = len(person_ids_list)
+        # has_linkedin_count = len(person_ids_list)
 
         signal_query_count = SIGNAL_INVEST_DATA.count_documents(signal_mongodb_query)        
-        
-        no_linkedin_count = signal_query_count - has_linkedin_count
-
-        min_sweet_spot = body.get("min_sweet_spot")
-        max_sweet_spot = body.get("max_sweet_spot")
-        
-        newstage = body.get("newstage")
-        
-        position = body.get("position")
-        
-        stage = body.get("stage")
-
-        profile_name = body.get("profile_name")
-
-        try:
-            stage_match_all = body.get("stage_match_all")
-        except:
-            pass
-        
-        min_invs_connect = body.get("min_invs_connect")
-        max_invs_connect = body.get("max_invs_connect")
-
-        #sweet spot filter
-        if (min_sweet_spot and min_sweet_spot != "") or (max_sweet_spot and max_sweet_spot != ""):
-            query["Sweet Spot"] = {}
-            query["Sweet Spot"]["$exists"] = True
-
-        if min_sweet_spot and min_sweet_spot != "":
-            query["Sweet Spot"]['$gte'] = int(min_sweet_spot)
-
-        if max_sweet_spot and max_sweet_spot != "":
-            query["Sweet Spot"]['$lte'] = int(max_sweet_spot) 
-        
-        #position filter 
-        if position and position != "":
-               query["Position"] = { "$regex": str(position) , }
-                
-        #stage filter if it only selected without ranking filter selector 
-        if newstage and len(newstage) > 0:
-                                
-            newstageitems=''
-            
-            for sitem in range(len(newstage)):
-                #list that have no records at all and will cause errors
-                if sitem < (len(newstage)-1):
-                  newstageitems=  newstageitems + str(newstage[sitem]) +"|"
-                else :
-                  newstageitems = newstageitems + str(newstage[sitem])
-                    
-            query["Sector & Stage Rankings"] = { "$regex": str(newstageitems) }
-            
-            #for multiple selection get first selection (first element on list)
-            #query["Sector & Stage Rankings"] = { "$regex": str(newstage[0]) , "$options" : "$" }
-
-            #single selection  (not a list)
-            #query["Sector & Stage Rankings"] = { "$regex": str(newstage) , }
-            
-
-
-        if stage and len(stage) > 0:
-            #match any
-            query["Sector & Stage Rankings"] = { "$in": stage }
-            
-            #match all
-            if stage_match_all:
-              query["Sector & Stage Rankings"] = { "$all": stage }
-
-        #combine stage(newstage) and sectors&stage rankings(stage) filters when exist
-        #because the last code is the one that impacts the final query for the same object int his example 'stage
-                
-        #new stage filter
-        if newstage and len(newstage) > 0 and stage and len(stage) > 0:
-           
-            newstageitems=''
-
-            for sitem in range(len(newstage)):
-                #list that have no records at all and will cause errors
-                if sitem < (len(newstage)-1):
-                  newstageitems=  newstageitems + str(newstage[sitem]) +"|"
-                else :
-                  newstageitems = newstageitems + str(newstage[sitem])
-            
-            #oldstage match any
-            query["Sector & Stage Rankings"] = { "$in": stage,"$regex": str(newstageitems) }
-            
-            #oldstage match all
-            if stage_match_all:
-                  query["Sector & Stage Rankings"] = { "$all": stage,"$regex": str(newstageitems) }
-
-            
-            
-        if (min_invs_connect and min_invs_connect != "") or (max_invs_connect and max_invs_connect != ""):
-            query["Investing connections amount"] = {}
-            query["Investing connections amount"]["$exists"] = True
-
-        if min_invs_connect and min_invs_connect != "":
-            query["Investing connections amount"]['$gte'] = int(min_invs_connect)
-
-        if max_invs_connect and max_invs_connect != "":
-            query["Investing connections amount"]['$lte'] = int(max_invs_connect)
-            
-        if profile_name and profile_name != "":
-            query["Profile Name"] = { "$regex": profile_name, "$options" :'i' }
-            
-        
-        #investment range filter
-        min_investment = body.get("min_investment")
-        max_investment = body.get("max_investment")
-        
-        if min_investment and min_investment != "" and max_investment and max_investment != "":
-            query["min_investment"] = {}
-            query["min_investment"]["$exists"] = True
-            query["max_investment"] = {}
-            query["max_investment"]["$exists"] = True
-
-            query["min_investment"]['$gte'] = int(min_investment)
-            query["max_investment"]['$gte'] = int(min_investment)
-
-            query["min_investment"]['$lte'] = int(max_investment) 
-            query["max_investment"]['$lte'] = int(max_investment) 
-
-
+      
         #Logic for pagination
         offset = int(request.args.get('offset',0))
         limit = 10
@@ -579,6 +483,7 @@ def handle_linkedin_investors():
         # Counting Query Documents Vs. Total Documents
         query_count = LINKEDIN_INVEST_DATA.count_documents(query)
 
+        no_linkedin_count = signal_query_count - query_count
 
         print("Slow Part 2 --- %s seconds ---" % (time.time() - start_time_2))
         total_count = signal_query_count
@@ -604,7 +509,7 @@ def handle_linkedin_investors():
             "limit": limit,
             "next_chunk": next_chunk,
             "prev_chunk": prev_chunk,
-            "has_linkedin_count": has_linkedin_count,
+            # "has_linkedin_count": has_linkedin_count,
             "no_linkedin_count": no_linkedin_count,
         })
     except Exception as e:
@@ -621,7 +526,7 @@ def handle_linkedin_investors():
         })
 
 
-# Count_Investors Route
+# LinkedIn Count_Investors Route
 @app.route('/api/investors/linkedin/count', methods=["POST"])
 @login_required
 def count_linkedin_investors():
@@ -638,13 +543,13 @@ def count_linkedin_investors():
       "count" : 0,
     })
 
-# Get Filters Options
+# LinkedIn Get Filters Options
 @app.route('/api/investors/linkedin/options')
 @login_required
 def linkedin_filter_options():
   try:
     try:
-      stage_options = list(LINKEDIN_INVEST_DATA.distinct("Sector & Stage Rankings"))
+      stage_options = list(LINKEDIN_INVEST_DATA.distinct("Sector & stage rankings"))
       stage_options = [x for x in stage_options if type(x) == str]
       position_options = list(LINKEDIN_INVEST_DATA.distinct("Position"))
       position_options = [x for x in position_options if type(x) == str]
@@ -655,6 +560,161 @@ def linkedin_filter_options():
       "options" : {
         "stage_options" : stage_options,
         "position_options" : position_options,
+      }
+    })
+  except:
+    return jsonify({
+      "options" : {},
+    })
+
+
+## Twitter_Investors Routes
+# Twitter Main Route
+@app.route('/api/investors/twitter', methods=["POST"])
+@login_required
+def handle_twitter_investors():
+
+    try:
+        user = User.objects(id=current_user.id).first()
+
+        query = {}
+        
+        body = request.get_json() 
+        
+        # Save Query to Session
+        user.update(set__filters__twitter_front=body)
+        
+
+        signal_mongodb_query = json.loads(user.filters["signal_back"])
+
+        person_ids_list = SIGNAL_INVEST_DATA.distinct("Person id", signal_mongodb_query)
+        # Converting to str() because person_id is stored as strings in twitter database
+        person_ids_list = [str(i) for i in person_ids_list]
+
+        query["Signal person ID"] = { "$in": person_ids_list }
+       
+        signal_query_count = SIGNAL_INVEST_DATA.count_documents(signal_mongodb_query)        
+
+        # Counting Query Documents Vs. Total Documents
+        query_count = TWITTER_INVEST_DATA.count_documents(query)
+
+        no_twitter_count = signal_query_count - query_count
+
+        ## ADDING TO QUERY ##
+
+        # Followers Query Logic
+        min_followers = body.get("min_followers")
+        max_followers = body.get("max_followers")
+        
+        if (min_followers and min_followers != "") or (max_followers and max_followers != ""):
+            query["Followers"] = {}
+            query["Followers"]["$exists"] = True
+
+        if min_followers and min_followers != "":
+            query["Followers"]['$gte'] = int(min_followers)
+
+        if max_followers and max_followers != "":
+            query["Followers"]['$lte'] = int(max_followers) 
+              
+        # Following Query Logic
+        min_following = body.get("min_following")
+        max_following = body.get("max_following")
+        
+        if (min_following and min_following != "") or (max_following and max_following != ""):
+            query["Following"] = {}
+            query["Following"]["$exists"] = True
+
+        if min_following and min_following != "":
+            query["Following"]['$gte'] = int(min_following)
+
+        if max_following and max_following != "":
+            query["Following"]['$lte'] = int(max_following) 
+              
+        #Logic for pagination
+        offset = int(request.args.get('offset',0))
+        limit = 10
+
+        starting_id = TWITTER_INVEST_DATA.find(query).sort('_id', pymongo.ASCENDING)
+
+        try:
+          last_id = starting_id[offset]['_id']
+        except:
+          last_id = None
+ 
+
+        total_count = TWITTER_INVEST_DATA.count_documents({})
+    
+        user.update(set__filters__twitter_back=json.dumps(query))
+
+        next_chunk = offset + limit
+        prev_chunk = 0
+        if offset - limit > 0:
+            prev_chunk = offset - limit
+
+
+        if last_id:
+          json_data = TWITTER_INVEST_DATA.find({**query, **{"_id": {'$gte': last_id}}}, limit=limit).sort('_id', pymongo.ASCENDING)
+        else:
+          json_data = []        
+            
+        query_count = TWITTER_INVEST_DATA.count_documents(query)
+
+        return jsonify({
+            "investors": loads(dumps(json_data)),
+            "total_count": total_count,
+            "query_count": query_count,
+            "limit": limit,
+            "next_chunk": next_chunk,
+            "prev_chunk": prev_chunk,
+            "no_twitter_count": no_twitter_count,
+        })
+    except Exception as e:
+        print(e)
+        return jsonify({
+            "investors": [],
+            "total_count": 0,
+            "query_count": 0,
+            "limit": 0,
+            "next_chunk": 0,
+            "prev_chunk": 0,
+            "no_twitter_count": 0,
+        })
+
+
+# Twitter Count_Investors Route
+@app.route('/api/investors/twitter/count', methods=["POST"])
+@login_required
+def count_twitter_investors():
+  try:
+    body = request.get_json()
+    field = body.get("field")
+    query = body.get("query")
+    count = TWITTER_INVEST_DATA.count_documents({ field: { "$regex": query, "$options" :'i' } })
+    return jsonify({
+      "count" : count,
+    })
+  except:
+    return jsonify({
+      "count" : 0,
+    })
+
+# Twitter Get Filters Options
+@app.route('/api/investors/twitter/options')
+@login_required
+def twitter_filter_options():
+  try:
+    # try:
+    #   stage_options = list(TWITTER_INVEST_DATA.distinct("Sector & stage rankings"))
+    #   stage_options = [x for x in stage_options if type(x) == str]
+    #   position_options = list(TWITTER_INVEST_DATA.distinct("Position"))
+    #   position_options = [x for x in position_options if type(x) == str]
+    # except:
+    #   stage_options = [] 
+    #   position_options = []
+    return jsonify({
+      "options" : {
+        # "stage_options" : stage_options,
+        # "position_options" : position_options,
       }
     })
   except:

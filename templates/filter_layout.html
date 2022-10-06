@@ -8,7 +8,7 @@
         <div class="modal-header">
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body d-flex justify-content-center">
           <img class="img-fluid" src="" alt="Full Image"/>
         </div>
       </div>
@@ -16,12 +16,13 @@
 </div>
 
 <!-- Filter Control Row -->
-<div class="sticky-top bg-white py-2">
+<div class="sticky-top bg-white py-2 z-index-4 border-bottom border-2 border-dark">
     <!-- Page Breadcrumb -->
     <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
         <ol class="breadcrumb ">
             <li class="breadcrumb-item {% block bCrumbSignalActive %}{% endblock %}" {% block bCrumbSignalCurrent %}{% endblock %}>{% block bCrumbSignalAnchor %}{% endblock %}</li>
-            <li class="breadcrumb-item {% block bCrumbLinkedInActive %}{% endblock %}" {% block bCrumbLinkedInCurrent %}{% endblock %}>{% block bCrumbLinkedInAnchor %}{% endblock %}</li>
+           {# <li class="breadcrumb-item {% block bCrumbLinkedInActive %}{% endblock %}" {% block bCrumbLinkedInCurrent %}{% endblock %}>{% block bCrumbLinkedInAnchor %}{% endblock %}</li> #}
+            <li class="breadcrumb-item {% block bCrumbTwitterActive %}{% endblock %}" {% block bCrumbTwitterCurrent %}{% endblock %}>{% block bCrumbTwitterAnchor %}{% endblock %}</li>
         </ol>
     </nav>
     <div class="row mb-2 align-items-center">

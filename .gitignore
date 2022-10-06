@@ -1,5 +1,13 @@
+# Folders
 /__pycache__
 /env
 .env
 
+# Files
 test.py
+LinkedIn Profiles samples - Profiles.csv
+csv_to_mongo_col.py
+mongo_strList_to_list.py
+mongo_clone_collection.py
+mongo_set_index.py
+not_in_signal.json

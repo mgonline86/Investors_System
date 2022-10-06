@@ -8,18 +8,19 @@ var lastQuery = "";
 
 // Define Filter Input Fields
 var firmInput = document.querySelector("#firm-select");
-var minSweetSpotInput = document.querySelector("#min-sweet-spot");
-var maxSweetSpotInput = document.querySelector("#max-sweet-spot");
-var positionInput = document.querySelector("#position-select");
 var newStageInput = document.querySelector("#new-stage-select");
 var stageInput = document.querySelector("#stage-select");
 var stageAllCheckInput = document.querySelector("#stage-all-check");
-var profileNameInput = document.querySelector("#searchProfileName");
+var sectorOfInterestInput = document.querySelector("#sectorOfInterest-select");
+var minSweetSpotInput = document.querySelector("#min-sweet-spot");
+var maxSweetSpotInput = document.querySelector("#max-sweet-spot");
+var positionInput = document.querySelector("#position-select");
+var minInvsInput = document.querySelector("#min-investment");
+var maxInvsInput = document.querySelector("#max-investment");
+// var profileNameInput = document.querySelector("#searchProfileName");
 var newProfileNameInput = document.querySelector("#new-profile-name-select");
 var minInvsConnctInput = document.querySelector("#min-invs-connect");
 var maxInvsConnctInput = document.querySelector("#max-invs-connect");
-var minInvsInput = document.querySelector("#min-investment");
-var maxInvsInput = document.querySelector("#max-investment");
 
 
 
@@ -106,13 +107,13 @@ async function get_inv(page_chunk = null, finalResults=false) {
                 li.classList.add("list-group-item");
 
                 // Appending main image to the list element
-                if (current_investor["images"].length !== 0) {
+                if (current_investor["Images"].length !== 0) {
                     let div = document.createElement('div');
                     div.style.cssText = 'position:relative';
                     div.classList.add("invest-img_container")
                     
                     let img = document.createElement('img');
-                    img.src = current_investor["images"][0];
+                    img.src = current_investor["Images"][0];
                     img.classList.add("img-fluid")
                     img.classList.add("invest-img")
                     
@@ -131,10 +132,10 @@ async function get_inv(page_chunk = null, finalResults=false) {
                     li.appendChild(div)
                 }
                 
-                // Appending Profile Name to the list element
-                if (current_investor["Profile Name"]) {
+                // Appending Profile name to the list element
+                if (current_investor["Profile name"]) {
                     let h3 = document.createElement('h3');
-                    h3.textContent = current_investor["Profile Name"];
+                    h3.textContent = current_investor["Profile name"];
                     li.appendChild(h3)
                     
                 }
@@ -276,7 +277,7 @@ searchInputs.forEach(searchInput => {
     })
 });
 
-// Handle Search Profile Name
+// Handle Search Profile name
 const handleSearchProfileName = debounce(async () => {
     let searchProfileName = document.getElementById("searchProfileName");
     let searchValue = searchProfileName.value.trim();
@@ -290,7 +291,7 @@ const handleSearchProfileName = debounce(async () => {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                "field" : "Profile Name",
+                "field" : "Profile name",
                 "query" : searchValue,
             })
         })
@@ -371,6 +372,7 @@ const updateFilters = async () =>{
         stageAllCheckInput.checked = signal_query.stage_match_all
         // profileNameInput.value = signal_query.profile_name;
         newProfileNameInput.setValue(signal_query.new_profile_name)
+        sectorOfInterestInput.setValue(signal_query.sector_of_interest)
         firmInput.setValue(signal_query.firm)
         minInvsConnctInput.value = signal_query.min_invs_connect
         maxInvsConnctInput.value = signal_query.max_invs_connect
@@ -384,6 +386,9 @@ const updateFilters = async () =>{
 
 // Fill the Option Lists in Filters
 const get_filters_options = async () => {
+    
+    show_load_layout();
+
     fetch("/api/investors/signal/options")
     .then(response => response.json())
     .then(data => {
@@ -431,27 +436,25 @@ const get_filters_options = async () => {
                 signal_query.position = this.value;
             });
 
+            
             // Get New Name Select Options
-            // if (signal_query.new_profile_name.length !== 0) {
-            //     var newNameOptions = signal_query.new_profile_name;
-            // }
-            // else{
-                var newNameOptions = data.options.new_profile_name_options || [];
-            // }
+            var newNameOptions = data.options.new_profile_name_options || [];
             
             VirtualSelect.init({
                 ele: '#new-profile-name-select',
                 options: newNameOptions,
                 search: true,
-                // Enable the multi select support
+                /* Enable the multi select support */
                 multiple: true,
-                // Customize the placeholder text
+                /* Customize the placeholder text */
                 placeholder: 'Search',
-                // Text to show when no options to show
+                /* Text to show when no options to show */
                 noOptionsText: 'No results found',
-                // Use this method to set options while loading options from server.
-                onServerSearch: searchDataOnServer,
-                // Show as Tags
+                /* Use this method to set options while loading options from server. */
+                // onServerSearch: searchDataOnServer,
+                /* Search options by startsWith() method */
+                searchByStartsWith: true,                
+                /* Show as Tags */
                 showValueAsTags: true,
             });
 
@@ -459,27 +462,25 @@ const get_filters_options = async () => {
                 signal_query.new_profile_name = this.value;
             });
 
+
             // Get Firm Select Options
-            // if (signal_query.firm.length !== 0) {
-            //     var firmOptions = signal_query.firm;
-            // }
-            // else{
-                var firmOptions = data.options.firm_options || [];
-            // }
+            var firmOptions = data.options.firm_options || [];
             
             VirtualSelect.init({
                 ele: '#firm-select',
                 options: firmOptions,
                 search: true,
-                // Enable the multi select support
+                /* Enable the multi select support */
                 multiple: true,
-                // Customize the placeholder text
+                /* Customize the placeholder text */
                 placeholder: 'Search',
-                // Text to show when no options to show
+                /* Text to show when no options to show */
                 noOptionsText: 'No results found',
-                // Use this method to set options while loading options from server.
-                onServerSearch: searchDataOnServer,
-                // Show as Tags
+                /* Use this method to set options while loading options from server. */
+                // onServerSearch: searchDataOnServer,
+                /* Search options by startsWith() method */
+                searchByStartsWith: true,
+                /* Show as Tags */
                 showValueAsTags: true,
             });
 
@@ -488,8 +489,36 @@ const get_filters_options = async () => {
             });
 
 
+            // Get Sectors of Interest Options
+            var sectorOfInterestOptions = data.options.sector_of_interest_options || [];
+            
+            VirtualSelect.init({
+                ele: '#sectorOfInterest-select',
+                options: sectorOfInterestOptions,
+                search: true,
+                /* Enable the multi select support */
+                multiple: true,
+                /* Customize the placeholder text */
+                placeholder: 'Search',
+                /* Text to show when no options to show */
+                noOptionsText: 'No results found',
+                /* Use this method to set options while loading options from server. */
+                // onServerSearch: searchDataOnServer,
+                /* Search options by startsWith() method */
+                searchByStartsWith: true,                
+                /* Show as Tags */
+                showValueAsTags: true,
+            });
+
+            document.querySelector('#sectorOfInterest-select').addEventListener('change', function() {
+                signal_query.sector_of_interest = this.value;
+            });
+
+
             // Update Filter Input Fields with Query Values
             updateFilters()
+                
+            hide_load_layout();
         }
         catch(err){
             console.log(err)
@@ -526,14 +555,19 @@ const getSearchData = async (searchValue, virtualSelect) => {
     let query_field = "";
     switch (eleId) {
         case "new-profile-name-select":
-            field = "Profile Name";
+            field = "Profile name";
             query_field = "new_profile_name";
             break;
             
-            case "firm-select":
-                field = "Firm";
-                query_field = "firm";
-            break;
+        case "firm-select":
+            field = "Firm";
+            query_field = "firm";
+        break;
+            
+        case "sectorOfInterest-select":
+            field = "Investement sectors & tags";
+            query_field = "sector_of_interest";
+        break;
     
         default:
             break;

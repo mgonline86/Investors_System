@@ -94,3 +94,8 @@ a.nostyle:visited {
 .vscomp-dropbox-container {
     z-index: 3 !important;
 }
+
+
+.z-index-4{
+    z-index: 4;
+}
