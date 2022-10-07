@@ -25,7 +25,8 @@ var maxInvsConnctInput = document.querySelector("#max-invs-connect");
 
 
 async function get_inv(page_chunk = null, finalResults=false) {
-    if (page_chunk) {
+    console.log("page_chunk: ", page_chunk)
+    if (page_chunk !== null) {
         lastQuery += String(page_chunk);
     }
 
