@@ -12,6 +12,7 @@ var newStageInput = document.querySelector("#new-stage-select");
 var stageInput = document.querySelector("#stage-select");
 var stageAllCheckInput = document.querySelector("#stage-all-check");
 var sectorOfInterestInput = document.querySelector("#sectorOfInterest-select");
+var isLeadInput = document.querySelector("#isLead-select");
 var minSweetSpotInput = document.querySelector("#min-sweet-spot");
 var maxSweetSpotInput = document.querySelector("#max-sweet-spot");
 var positionInput = document.querySelector("#position-select");
@@ -25,7 +26,6 @@ var maxInvsConnctInput = document.querySelector("#max-invs-connect");
 
 
 async function get_inv(page_chunk = null, finalResults=false) {
-    console.log("page_chunk: ", page_chunk)
     if (page_chunk !== null) {
         lastQuery += String(page_chunk);
     }
@@ -235,6 +235,23 @@ document.querySelector('#new-stage-select').addEventListener('change', function(
 });
 ///// added by hesham
 
+// is_Lead filter
+var isLeadOptions = [
+    {label: 'Yes', value: "t",},
+    {label: 'No', value: "f",},
+]
+
+VirtualSelect.init({
+    ele: '#isLead-select',
+    options: isLeadOptions,
+    multiple: false,
+    placeholder: 'Do they lead rounds?',
+});
+
+document.querySelector('#isLead-select').addEventListener('change', function() {
+    signal_query.is_lead = this.value;
+});
+
 
 
 const handleStageMatchAll = () => {
@@ -374,6 +391,7 @@ const updateFilters = async () =>{
         // profileNameInput.value = signal_query.profile_name;
         newProfileNameInput.setValue(signal_query.new_profile_name)
         sectorOfInterestInput.setValue(signal_query.sector_of_interest)
+        isLeadInput.setValue(signal_query.is_lead)
         firmInput.setValue(signal_query.firm)
         minInvsConnctInput.value = signal_query.min_invs_connect
         maxInvsConnctInput.value = signal_query.max_invs_connect

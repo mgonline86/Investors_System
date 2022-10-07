@@ -146,7 +146,6 @@ def handle_signal_investors():
         body = request.get_json()
         
         # Save Query to Session
-        add_to_session("signal_query", body)
         user = User.objects(id=current_user.id).first()
         user.update(set__filters__signal_front=body)
 
@@ -166,6 +165,11 @@ def handle_signal_investors():
         firm = body.get("firm")
 
         sector_of_interest = body.get("sector_of_interest")
+        
+        # is_lead filter 
+        is_lead = body.get("is_lead")
+        if is_lead and is_lead != "":
+          query["Is lead"] = True if is_lead == "t" else False
 
         try:
             stage_match_all = body.get("stage_match_all")
@@ -595,10 +599,6 @@ def handle_twitter_investors():
        
         signal_query_count = SIGNAL_INVEST_DATA.count_documents(signal_mongodb_query)        
 
-        # Counting Query Documents Vs. Total Documents
-        query_count = TWITTER_INVEST_DATA.count_documents(query)
-
-        no_twitter_count = signal_query_count - query_count
 
         ## ADDING TO QUERY ##
 
@@ -630,6 +630,11 @@ def handle_twitter_investors():
         if max_following and max_following != "":
             query["Following"]['$lte'] = int(max_following) 
               
+        # Counting Query Documents Vs. Total Documents
+        query_count = TWITTER_INVEST_DATA.count_documents(query)
+        no_twitter_count = signal_query_count - query_count
+        total_count = signal_query_count
+
         #Logic for pagination
         offset = int(request.args.get('offset',0))
         limit = 10
@@ -642,8 +647,6 @@ def handle_twitter_investors():
           last_id = None
  
 
-        total_count = TWITTER_INVEST_DATA.count_documents({})
-    
         user.update(set__filters__twitter_back=json.dumps(query))
 
         next_chunk = offset + limit
