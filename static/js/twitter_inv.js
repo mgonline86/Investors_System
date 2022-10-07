@@ -11,10 +11,10 @@ var maxFollowing = document.querySelector("#max-following");
 
 
 async function get_inv(page_chunk = null) {
-    if (page_chunk) {
+    if (page_chunk !== null) {
         lastQuery += String(page_chunk);
     }
-    
+
     // If there is no change in the filter Abort
     if (JSON.stringify(twitter_query) === lastQuery) {
         return;
