@@ -1,0 +1,78 @@
+{% extends '/filter_layout.html' %}
+{% block title %}ANGELIST INVESTORS{% endblock %}
+{% block style %}
+    <link rel="stylesheet" href="/static/virtual-select-master/virtual-select.min.css" />
+{% endblock %}
+
+<!-- Breadcrumb Options -->
+<!-- Signal Breadcrumb -->
+{% block bCrumbSignalAnchor %}<a href="/signal_investors">Signal</a>{% endblock %}</li>
+
+<!-- LinkedIn Breadcrumb -->
+{#{% block bCrumbLinkedInAnchor %}<a href="/signal_investors">LinkedIn</a>{% endblock %}</li>#}
+
+<!-- Twitter Breadcrumb -->
+{% block bCrumbTwitterAnchor %}<a href="/twitter_investors">Twitter</a>{% endblock %}</li>
+
+<!-- Angelist Breadcrumb -->
+{% block bCrumbAngelistActive %}active{% endblock %}
+{% block bCrumbAngelistCurrent %}aria-current="page"{% endblock %}
+{% block bCrumbAngelistAnchor %}Angelist{% endblock %}
+
+
+{% block filtersCanvasBody %}
+  <form class="row gy-2 gx-3 align-items-center">
+    <h3>All filters are still in progress (not accurate)</h3>
+    
+    <div class="accordion" id="filterAccordion">
+
+      <!-- Education Amount Filter (Start) -->
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="education_amount">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#educationAmountCollapse" aria-expanded="true" aria-controls="educationAmountCollapse">
+            Education Amount
+          </button>
+        </h2>
+        <div id="educationAmountCollapse" class="accordion-collapse collapse show" aria-labelledby="education_amount">
+          <div class="accordion-body">
+            <div class="row">
+                <div class="col">
+                    <label for="min-education_amount" class="form-label">Min</label>
+                    <input type="number" class="form-control" min="0" max="99999999" step="1" id="min-education_amount" onchange="handleMinEducationAmount()" >
+                </div>
+                <div class="col">
+                    <label for="max-education_amount" class="form-label">Max</label>
+                    <input type="number" class="form-control" min="0" max="99999999" step="1" id="max-education_amount" onchange="handleMaxEducationAmount()" >
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Education Amount Filter (End) -->
+
+    </div>
+  </form>
+{% endblock %}
+
+{% block excluded_count %}
+    <small id="excluded_count" class="text-danger"></small>
+{% endblock %}
+
+{% block filtersResultsRow %}
+    <ul class="list-group-flush" id="inv_list"></ul>
+{% endblock %}
+
+{% block js %}
+    <script src="/static/virtual-select-master/virtual-select.min.js"></script>
+    <script>
+        // Get angelist_inv data function
+        var blank_angelist_query = {
+            min_education_amount: "",
+            max_education_amount: "",
+        };
+
+        var angelist_query = {{ angelist_query | tojson }} || blank_angelist_query;
+
+    </script>
+    <script src="/static/js/angelist_inv.js"></script>
+{% endblock %}

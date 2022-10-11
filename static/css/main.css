@@ -56,6 +56,11 @@ a.nostyle:visited {
     align-items: end;
 }
 
+.invest-img{
+    max-height: 100px !important;
+    justify-items: center;
+}
+
 .invest-img, .img-zoom{
     grid-column: 1;
     grid-row: 1;

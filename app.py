@@ -38,8 +38,11 @@ LINKEDIN_INVEST_DATA = db.signalLinkedInSample
 #Twitter Data 
 TWITTER_INVEST_DATA = db.signalTwittersUpdate1 
 
+#Angelist Data 
+ANGELIST_INVEST_DATA = db.signalAngelist 
+
 #Tail Database (Last one in line)
-TAIL_DATABASE = TWITTER_INVEST_DATA
+TAIL_DATABASE = ANGELIST_INVEST_DATA
 
 ### APP SETUP ###
 app = Flask(__name__)
@@ -133,6 +136,13 @@ def twitter_investors():
     twitter_query = current_user.filters.get("twitter_front")
     return render_template('pages/twitter_investors.html',  twitter_query=twitter_query)
 
+@app.route('/angelist_investors')
+@login_required
+def angelist_investors():
+    # user = User.objects(id=current_user.id).first()
+    angelist_query = current_user.filters.get("angelist_front")
+    return render_template('pages/angelist_investors.html',  angelist_query=angelist_query)
+
 
 ### API ROUTES
 ## Signal_Investors Routes
@@ -146,7 +156,6 @@ def handle_signal_investors():
         body = request.get_json()
         
         # Save Query to Session
-        # user = User.objects(id=current_user.id).first()
         current_user.update(set__filters__signal_front=body)
 
         min_sweet_spot = body.get("min_sweet_spot")
@@ -439,7 +448,6 @@ def signal_filter_options():
 def handle_linkedin_investors():
 
     try:
-        # user = User.objects(id=current_user.id).first()
 
         query = {}
         body = request.get_json() 
@@ -580,7 +588,6 @@ def handle_twitter_investors():
 
     try:
         start_time = time.time()
-        # user = User.objects(id=current_user.id).first()
 
         query = {}
         
@@ -722,6 +729,144 @@ def twitter_filter_options():
     return jsonify({
       "options" : {
         "confidence_options" : confidence_options,
+      }
+    })
+  except:
+    return jsonify({
+      "options" : {},
+    })
+
+
+## Angelist_Investors Routes
+# Angelist Main Route
+@app.route('/api/investors/angelist', methods=["POST"])
+@login_required
+def handle_angelist_investors():
+
+    try:
+        start_time = time.time()
+
+        query = {}
+        
+        body = request.get_json() 
+        
+        # Save Query to Session
+        current_user.update(set__filters__angelist_front=body)
+        
+
+        twitter_mongodb_query = json.loads(current_user.filters["twitter_back"])
+
+        person_ids_list = TWITTER_INVEST_DATA.distinct("Signal person ID", twitter_mongodb_query)  #SLOW STEP
+        print("here:", time.time()-start_time)
+        # Converting to int() because person_id is stored as strings in twitter database
+        person_ids_list = [int(i) for i in person_ids_list]
+
+
+        query["Signal person ID"] = { "$in": person_ids_list }
+       
+        twitter_query_count = TWITTER_INVEST_DATA.count_documents(twitter_mongodb_query)        
+              
+        # Counting Query Documents Vs. Total Documents
+        query_count = ANGELIST_INVEST_DATA.count_documents(query)
+        no_angelist_count = twitter_query_count - query_count
+        total_count = ANGELIST_INVEST_DATA.count_documents({})
+
+
+        ## ADDING TO QUERY ##
+       
+        # Education Amount Query Logic
+        min_education_amount = body.get("min_education_amount")
+        max_education_amount = body.get("max_education_amount")
+        
+        if (min_education_amount and min_education_amount != "") or (max_education_amount and max_education_amount != ""):
+            query["Education Amount"] = {}
+            query["Education Amount"]["$exists"] = True
+
+        if min_education_amount and min_education_amount != "":
+            query["Education Amount"]['$gte'] = int(min_education_amount)
+
+        if max_education_amount and max_education_amount != "":
+            query["Education Amount"]['$lte'] = int(max_education_amount) 
+              
+
+        #Logic for pagination
+        offset = int(request.args.get('offset',0))
+        limit = 10
+
+        starting_id = ANGELIST_INVEST_DATA.find(query).sort('_id', pymongo.ASCENDING)
+
+        try:
+          last_id = starting_id[offset]['_id']
+        except:
+          last_id = None
+ 
+
+        current_user.update(set__filters__angelist_back=json.dumps(query))
+
+        next_chunk = offset + limit
+        prev_chunk = 0
+        if offset - limit > 0:
+            prev_chunk = offset - limit
+
+
+        if last_id:
+          json_data = ANGELIST_INVEST_DATA.find({**query, **{"_id": {'$gte': last_id}}}, limit=limit).sort('_id', pymongo.ASCENDING)
+        else:
+          json_data = []        
+            
+        query_count = ANGELIST_INVEST_DATA.count_documents(query)
+
+        return jsonify({
+            "investors": loads(dumps(json_data)),
+            "total_count": total_count,
+            "query_count": query_count,
+            "limit": limit,
+            "next_chunk": next_chunk,
+            "prev_chunk": prev_chunk,
+            "no_angelist_count": no_angelist_count,
+        })
+    except Exception as e:
+        print(e)
+        return jsonify({
+            "investors": [],
+            "total_count": 0,
+            "query_count": 0,
+            "limit": 0,
+            "next_chunk": 0,
+            "prev_chunk": 0,
+            "no_angelist_count": 0,
+        })
+
+
+# angelist Count_Investors Route
+@app.route('/api/investors/angelist/count', methods=["POST"])
+@login_required
+def count_angelist_investors():
+  try:
+    body = request.get_json()
+    field = body.get("field")
+    query = body.get("query")
+    count = ANGELIST_INVEST_DATA.count_documents({ field: { "$regex": query, "$options" :'i' } })
+    return jsonify({
+      "count" : count,
+    })
+  except:
+    return jsonify({
+      "count" : 0,
+    })
+
+# angelist Get Filters Options
+@app.route('/api/investors/angelist/options')
+@login_required
+def angelist_filter_options():
+  try:
+    # try:
+    #   confidence_options = ANGELIST_INVEST_DATA.distinct("Confidence",{"Confidence":{"$nin":["",None,float("nan")]}})
+    # except:
+    #   confidence_options = []
+    return jsonify({
+      "options" : {
+        # "confidence_options" : confidence_options,
       }
     })
   except:
