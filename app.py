@@ -115,22 +115,22 @@ def index():
 @app.route('/signal_investors')
 @login_required
 def signal_investors():
-    user = User.objects(id=current_user.id).first()
-    signal_query = user.filters.get("signal_front")
+    # user = User.objects(id=current_user.id).first()
+    signal_query = current_user.filters.get("signal_front")
     return render_template('pages/signal_investors.html',  signal_query=signal_query)
 
 @app.route('/linkedin_investors')
 @login_required
 def linkedin_investors():
-    user = User.objects(id=current_user.id).first()
-    linkedin_query = user.filters.get("linkedin_front")
+    # user = User.objects(id=current_user.id).first()
+    linkedin_query = current_user.filters.get("linkedin_front")
     return render_template('pages/linkedin_investors.html',  linkedin_query=linkedin_query)
 
 @app.route('/twitter_investors')
 @login_required
 def twitter_investors():
-    user = User.objects(id=current_user.id).first()
-    twitter_query = user.filters.get("twitter_front")
+    # user = User.objects(id=current_user.id).first()
+    twitter_query = current_user.filters.get("twitter_front")
     return render_template('pages/twitter_investors.html',  twitter_query=twitter_query)
 
 
@@ -146,8 +146,8 @@ def handle_signal_investors():
         body = request.get_json()
         
         # Save Query to Session
-        user = User.objects(id=current_user.id).first()
-        user.update(set__filters__signal_front=body)
+        # user = User.objects(id=current_user.id).first()
+        current_user.update(set__filters__signal_front=body)
 
         min_sweet_spot = body.get("min_sweet_spot")
         max_sweet_spot = body.get("max_sweet_spot")
@@ -298,17 +298,17 @@ def handle_signal_investors():
 
         if query_count < total_count:
           # add_to_session("signal_mongodb_query", query)
-          user.update(set__filters__signal_back=json.dumps(query))
+          current_user.update(set__filters__signal_back=json.dumps(query))
 
         else:
           # add_to_session("signal_mongodb_query", {})
-          user.update(set__filters__signal_back=json.dumps({}))
+          current_user.update(set__filters__signal_back=json.dumps({}))
 
 
         # Get Final Results Logic
         final_Results = str(request.args.get('finalResults',False))
         if final_Results == "true":
-          final_query = json.loads(user.filters.get("twitter_back"))
+          final_query = json.loads(current_user.filters.get("twitter_back"))
           final_person_ids = TAIL_DATABASE.distinct("Signal person ID", final_query)
           final_person_ids = [int(i) for i in final_person_ids]
           query["Person id"] = { "$in": final_person_ids }
@@ -439,18 +439,18 @@ def signal_filter_options():
 def handle_linkedin_investors():
 
     try:
-        user = User.objects(id=current_user.id).first()
+        # user = User.objects(id=current_user.id).first()
 
         query = {}
         body = request.get_json() 
         
         # Save Query to Session
         # add_to_session("linkedin_query", body)
-        user.update(set__filters__linkedin_front=body)
+        current_user.update(set__filters__linkedin_front=body)
         
 
         # signal_mongodb_query = session["signal_mongodb_query"]
-        signal_mongodb_query = json.loads(user.filters["signal_back"])
+        signal_mongodb_query = json.loads(current_user.filters["signal_back"])
 
 
         # has_linkedin_query = {"$and":[{"Linkedin Profile Attached": {"$ne": None}}, {"Linkedin Profile Attached": {"$ne": ""}}]}
@@ -492,7 +492,7 @@ def handle_linkedin_investors():
         print("Slow Part 2 --- %s seconds ---" % (time.time() - start_time_2))
         total_count = signal_query_count
     
-        user.update(set__filters__linkedin_back=json.dumps(query))
+        current_user.update(set__filters__linkedin_back=json.dumps(query))
 
         next_chunk = offset + limit
         prev_chunk = 0
@@ -579,29 +579,43 @@ def linkedin_filter_options():
 def handle_twitter_investors():
 
     try:
-        user = User.objects(id=current_user.id).first()
+        start_time = time.time()
+        # user = User.objects(id=current_user.id).first()
 
         query = {}
         
         body = request.get_json() 
         
         # Save Query to Session
-        user.update(set__filters__twitter_front=body)
+        current_user.update(set__filters__twitter_front=body)
         
 
-        signal_mongodb_query = json.loads(user.filters["signal_back"])
+        signal_mongodb_query = json.loads(current_user.filters["signal_back"])
 
-        person_ids_list = SIGNAL_INVEST_DATA.distinct("Person id", signal_mongodb_query)
+        person_ids_list = SIGNAL_INVEST_DATA.distinct("Person id", signal_mongodb_query)  #SLOW STEP
+        print("here:", time.time()-start_time)
         # Converting to str() because person_id is stored as strings in twitter database
         person_ids_list = [str(i) for i in person_ids_list]
+
 
         query["Signal person ID"] = { "$in": person_ids_list }
        
         signal_query_count = SIGNAL_INVEST_DATA.count_documents(signal_mongodb_query)        
+              
+        # Counting Query Documents Vs. Total Documents
+        query_count = TWITTER_INVEST_DATA.count_documents(query)
+        no_twitter_count = signal_query_count - query_count
+        total_count = TWITTER_INVEST_DATA.count_documents({})
 
 
         ## ADDING TO QUERY ##
 
+        # Confidence Query Logic
+        confidence = body.get("confidence")
+        if confidence and len(confidence) > 0:
+            #match any
+            query["Confidence"] = { "$in": confidence }
+        
         # Followers Query Logic
         min_followers = body.get("min_followers")
         max_followers = body.get("max_followers")
@@ -629,11 +643,6 @@ def handle_twitter_investors():
 
         if max_following and max_following != "":
             query["Following"]['$lte'] = int(max_following) 
-              
-        # Counting Query Documents Vs. Total Documents
-        query_count = TWITTER_INVEST_DATA.count_documents(query)
-        no_twitter_count = signal_query_count - query_count
-        total_count = signal_query_count
 
         #Logic for pagination
         offset = int(request.args.get('offset',0))
@@ -647,7 +656,7 @@ def handle_twitter_investors():
           last_id = None
  
 
-        user.update(set__filters__twitter_back=json.dumps(query))
+        current_user.update(set__filters__twitter_back=json.dumps(query))
 
         next_chunk = offset + limit
         prev_chunk = 0
@@ -706,18 +715,13 @@ def count_twitter_investors():
 @login_required
 def twitter_filter_options():
   try:
-    # try:
-    #   stage_options = list(TWITTER_INVEST_DATA.distinct("Sector & stage rankings"))
-    #   stage_options = [x for x in stage_options if type(x) == str]
-    #   position_options = list(TWITTER_INVEST_DATA.distinct("Position"))
-    #   position_options = [x for x in position_options if type(x) == str]
-    # except:
-    #   stage_options = [] 
-    #   position_options = []
+    try:
+      confidence_options = TWITTER_INVEST_DATA.distinct("Confidence",{"Confidence":{"$nin":["",None,float("nan")]}})
+    except:
+      confidence_options = []
     return jsonify({
       "options" : {
-        # "stage_options" : stage_options,
-        # "position_options" : position_options,
+        "confidence_options" : confidence_options,
       }
     })
   except:

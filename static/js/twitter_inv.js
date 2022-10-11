@@ -4,6 +4,7 @@ var next_chunk = 0
 var lastQuery = "";
 
 // Define Filter Input Fields
+var confidenceInput = document.querySelector("#confidence-select");
 var minFollowers = document.querySelector("#min-followers");
 var maxFollowers = document.querySelector("#max-followers");
 var minFollowing = document.querySelector("#min-following");
@@ -208,6 +209,7 @@ const toggleviewImageModal = (event) => {
 // Update Filter Input Fields with Query Values
 const updateFilters = async () =>{
     try {
+        confidenceInput.setValue(twitter_query.confidence)
         minFollowers.value = twitter_query.min_followers;
         maxFollowers.value = twitter_query.max_followers;
         minFollowing.value = twitter_query.min_following;
@@ -224,6 +226,30 @@ const get_filters_options = async () => {
     .then(response => response.json())
     .then(data => {
         try {
+            // Get confidence Select Options
+            var confidenceOptions = data.options.confidence_options || [];
+            
+            VirtualSelect.init({
+                ele: '#confidence-select',
+                options: confidenceOptions,
+                search: true,
+                /* Enable the multi select support */
+                multiple: true,
+                /* Customize the placeholder text */
+                placeholder: 'Search',
+                /* Text to show when no options to show */
+                noOptionsText: 'No results found',
+                /* Use this method to set options while loading options from server. */
+                // onServerSearch: searchDataOnServer,
+                /* Search options by startsWith() method */
+                searchByStartsWith: true,
+                /* Show as Tags */
+                showValueAsTags: true,
+            });
+
+            document.querySelector('#confidence-select').addEventListener('change', function() {
+                twitter_query.confidence = this.value;
+            });
 
             // Update Filter Input Fields with Query Values
             updateFilters()
