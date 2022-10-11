@@ -43,6 +43,8 @@ ANGELIST_INVEST_DATA = db.signalAngelist
 
 #Tail Database (Last one in line)
 TAIL_DATABASE = ANGELIST_INVEST_DATA
+TAIL_QUERY = "angelist_back"
+TAIL_PERSON_ID_FIELD = "Signal person ID"
 
 ### APP SETUP ###
 app = Flask(__name__)
@@ -317,8 +319,8 @@ def handle_signal_investors():
         # Get Final Results Logic
         final_Results = str(request.args.get('finalResults',False))
         if final_Results == "true":
-          final_query = json.loads(current_user.filters.get("twitter_back"))
-          final_person_ids = TAIL_DATABASE.distinct("Signal person ID", final_query)
+          final_query = json.loads(current_user.filters.get(TAIL_QUERY))
+          final_person_ids = TAIL_DATABASE.distinct(TAIL_PERSON_ID_FIELD, final_query)
           final_person_ids = [int(i) for i in final_person_ids]
           query["Person id"] = { "$in": final_person_ids }
           query_count = SIGNAL_INVEST_DATA.count_documents(query)
