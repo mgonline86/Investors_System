@@ -23,7 +23,7 @@ class ConfigClass(object):
     # Flask-MongoEngine settings
     MONGODB_SETTINGS = {
         'db': 'the_new_system',
-        'host': 'mongodb://{}:{}@cluster1-shard-00-00.xwjgf.mongodb.net:27017,cluster1-shard-00-01.xwjgf.mongodb.net:27017,cluster1-shard-00-02.xwjgf.mongodb.net:27017/the_new_system?ssl=true&replicaSet=atlas-1287r0-shard-0&authSource=admin&retryWrites=true&w=majority'.format(username, password)
+        'host': 'mongodb+srv://{}:{}@cluster0.fldcstl.mongodb.net/the_new_system?retryWrites=true&w=majority'.format(username, password)
     }
 
     # Flask-Mail SMTP server settings
