@@ -12,6 +12,6 @@ username = parse.quote_plus(DB_USERNAME)
 password = parse.quote_plus(DB_PASSWORD)
 
 ## Connecting to Mongo Database Setup
-cluster = MongoClient("mongodb://{}:{}@cluster1-shard-00-00.xwjgf.mongodb.net:27017,cluster1-shard-00-01.xwjgf.mongodb.net:27017,cluster1-shard-00-02.xwjgf.mongodb.net:27017/?ssl=true&replicaSet=atlas-1287r0-shard-0&authSource=admin&retryWrites=true&w=majority".format(username, password))
+cluster = MongoClient("mongodb+srv://{}:{}@cluster0.fldcstl.mongodb.net/signalNFX?retryWrites=true&w=majority".format(username, password))
 
 db = cluster.signalNFX
